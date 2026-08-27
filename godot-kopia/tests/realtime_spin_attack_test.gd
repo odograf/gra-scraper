@@ -41,13 +41,19 @@ func _run() -> void:
 		var cell := attack_image.get_region(Rect2i((frame_index % 4) * 640, floori(frame_index / 4.0) * 480, 640, 480))
 		var used := cell.get_used_rect()
 		_expect(used.position.x > 8 and used.end.x < 632, "Klatka %d ma zapas po bokach i nie ucina torby" % frame_index)
+	var queued_destination := player.global_position + Vector2(240, 60)
+	player.set_move_target(queued_destination)
+	_expect(player.has_buffered_move_command(), "Klik mapy podczas zamachu trafia do kolejki")
+	_expect(not player.is_moving_to_target(), "Bohater nie przerywa zamachu ruchem")
+	_expect(player.target_marker.visible and player.target_marker.global_position == queued_destination, "Znacznik od razu pokazuje zakolejkowany cel")
 	await create_timer(0.30).timeout
 	_expect(player.attack_hitbox.monitoring, "Hitbox jest aktywny w środku obrotu")
 	_expect(hits == [player.SPIN_ATTACK_DAMAGE], "Cel w zasięgu otrzymuje dokładnie jedno trafienie")
 	await create_timer(0.46).timeout
 	_expect(not player.is_action_busy(), "Po obrocie postać odzyskuje sterowanie")
 	_expect(not player.attack_hitbox.monitoring, "Po ataku hitbox reklamówki jest wyłączony")
-	_expect(String(player.sprite.animation).begins_with("idle_"), "Po zamachu wraca animacja bezruchu")
+	_expect(player.is_moving_to_target() and not player.has_buffered_move_command(), "Po zamachu kolejka natychmiast uruchamia ruch")
+	_expect(String(player.sprite.animation).begins_with("walk_"), "Po zamachu animacja płynnie przechodzi do chodu")
 
 	if failures == 0:
 		print("REALTIME_SPIN_ATTACK_TEST_OK")

@@ -92,7 +92,8 @@ func _run() -> void:
 	game.player._finish_action()
 	for i in range(6):
 		_expect(game.inventory.add_item("can"), "Puszka %d mieści się w reklamówce" % (i + 1))
-	_expect(not game.inventory.can_add("can"), "Pełna reklamówka blokuje siódmą puszkę")
+	_expect(not PlayerInventory.LIMITS_ENABLED, "Limit pojemnika jest tymczasowo wyłączony")
+	_expect(game.inventory.can_add("can"), "Przy wyłączonym limicie można dołożyć siódmą puszkę")
 	game.cash = 5.0
 	game.alcohol_level = 0.0
 	game.nicotine_level = 0.0

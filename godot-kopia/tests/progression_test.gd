@@ -8,6 +8,8 @@ func _init() -> void:
 	call_deferred("_run")
 
 func _run() -> void:
+	var dog_definition := CombatantConfig.enemy_definition(&"park_dog")
+	_expect(dog_definition is CombatantDefinition and dog_definition.max_health == 30 and dog_definition.xp_reward == 50, "Centralna konfiguracja zwraca typowaną definicję przeciwnika")
 	var packed: PackedScene = load("res://scenes/main.tscn")
 	var game = packed.instantiate()
 	root.add_child(game)
@@ -25,6 +27,10 @@ func _run() -> void:
 	_expect(strength_button != null and not strength_button.disabled, "Ekran ekwipunku pozwala rozdać wolny punkt")
 	game._increase_stat("strength")
 	_expect(int(game.character_stats.strength) == 1 and game.stat_points == 0, "Punkt można przeznaczyć na Siłę")
+	_expect(game.player.attack_damage() == 11, "Siła zwiększa także zwykły atak czasu rzeczywistego")
+	game.stat_points = 1
+	game._increase_stat("endurance")
+	_expect(game.player_max_health == 105 and game.player_health == 100, "Kondycja natychmiast zwiększa maksymalne życie wspólnego stanu bohatera")
 
 	var rules = CombatRulesScript.new()
 	rules.reset(20260825, {"strength": 2, "endurance": 2, "agility": 2})

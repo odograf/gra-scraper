@@ -1,6 +1,8 @@
 class_name CombatantConfig
 extends RefCounted
 
+const CombatantDefinitionScript := preload("res://scripts/combatant_definition.gd")
+
 # Jedyne miejsce do ustawiania bazowych parametrów bohatera i przeciwników.
 # Jedno pole zasięgu w walce na mapie odpowiada 64 pikselom.
 const RANGE_UNIT_PIXELS := 64.0
@@ -27,8 +29,11 @@ static func player() -> Dictionary:
 	return PLAYER.duplicate(true)
 
 static func enemy(enemy_id: String) -> Dictionary:
+	return enemy_definition(enemy_id).to_dictionary()
+
+static func enemy_definition(enemy_id: StringName) -> CombatantDefinition:
 	assert(ENEMIES.has(enemy_id), "Brak konfiguracji przeciwnika: %s" % enemy_id)
-	return (ENEMIES[enemy_id] as Dictionary).duplicate(true)
+	return CombatantDefinitionScript.from_dictionary(enemy_id, ENEMIES[enemy_id])
 
 static func has_enemy(enemy_id: String) -> bool:
 	return ENEMIES.has(enemy_id)

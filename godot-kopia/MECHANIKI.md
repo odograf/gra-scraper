@@ -4,9 +4,9 @@
 
 ## 1. Główna koncepcja
 
-**Gatunek:** strategiczne RPG 2D z eksploracją niewielkich polskich lokacji i turową walką.
+**Gatunek:** strategiczne RPG 2D z eksploracją niewielkich polskich lokacji i hybrydową walką.
 
-Gracz kieruje młodym chłopakiem próbującym przeżyć z dnia na dzień. Zaczyna od zbierania puszek do reklamówki. Z czasem zdobywa lepszy ekwipunek, poznaje nowe sposoby zarabiania, rozwija statystyki oraz wdaje się w konflikty rozgrywane w systemie turowym.
+Gracz kieruje młodym chłopakiem próbującym przeżyć z dnia na dzień. Zaczyna od zbierania puszek do reklamówki. Z czasem zdobywa lepszy ekwipunek, poznaje nowe sposoby zarabiania, rozwija statystyki oraz wdaje się w starcia mapowe czasu rzeczywistego i ważniejsze konflikty fabularne rozgrywane turowo.
 
 Strategia polega przede wszystkim na zarządzaniu:
 
@@ -162,9 +162,9 @@ Narzędzie nie jest tylko przedmiotem zwiększającym statystykę. Powinno otwie
 - Gracz może przerwać działanie i uciec, zanim zdobędzie przedmiot.
 - Ryzyko powinno być czytelne przed zatwierdzeniem akcji.
 
-## 7. Walka turowa
+## 7. Walka hybrydowa
 
-### Eksperyment kopii — walka czasu rzeczywistego
+### MEC-028: Walka mapowa czasu rzeczywistego — wdrożone
 
 - Arkusz chodu jest wzorcem skali, kolorów i położenia bohatera. Czynności korzystają z pól 256×256 i wspólnej kotwicy stóp `(128, 232)`, a arkusz zamachu zachowuje wspólną podstawę `(320, 420)`.
 - Bazowe statystyki bohatera to: 100 życia, 10 ataku, 0 obrony, 10 zwinności i zasięg 2.
@@ -178,6 +178,18 @@ Narzędzie nie jest tylko przedmiotem zwiększającym statystykę. Powinno otwie
 - Ugryzienia odejmują życie ze wspólnego paska bohatera widocznego w głównym HUD-zie.
 - Pies korzysta z osobnego hurtboxa i wspólnej podstawy łap we wszystkich klatkach, dzięki czemu nie zmienia rozmiaru ani nie skacze podczas animacji. Po trzech zwykłych trafieniach wygasa, znika i przyznaje XP.
 - Bazowe statystyki bohatera oraz wszystkich obecnych typów przeciwników są ustawiane w jednym pliku: `scripts/combatant_config.gd`.
+- Fauna i zwykłe zagrożenia terenowe, obecnie psy oraz Szczóry, atakują bez przełączania widoku. Nazwani przeciwnicy fabularni, obecnie Burek, Zadymiarz i Żul 1, korzystają z osobnego ekranu turowego. Oba tryby współdzielą trwałe zdrowie oraz bazowe statystyki bohatera.
+- `PlayerState` jest jedynym trwałym właścicielem zdrowia i rozwijanych statystyk bohatera. HUD oraz oba tryby walki synchronizują się z tym stanem przez metody i sygnały.
+- Siła zwiększa także zwykły atak na mapie o 1 obrażenie za punkt. Kondycja natychmiast zwiększa wspólne maksymalne zdrowie o 5 za punkt; nie leczy brakującego zdrowia.
+- Otwarcie menu, dialogu albo innego modalu anuluje przygotowywany atak przeciwnika mapowego. Atak nie może trafić gracza po zatrzymaniu rozgrywki.
+
+### MEC-032: Kolejkowanie ruchu po akcji — wdrożone
+
+- Lewy klik w wolne miejsce mapy podczas animacji ataku lub innej zablokowanej akcji zapisuje polecenie ruchu zamiast je odrzucać.
+- Bohater zawsze kończy bieżącą animację; zakolejkowany ruch nie przerywa trafienia ani aktywnego okna ataku.
+- Natychmiast po zakończeniu akcji bohater przechodzi do chodu i rusza do wskazanego punktu.
+- Kolejka przechowuje jeden cel. Kolejny klik mapy zastępuje poprzedni, więc ostatnia komenda gracza ma pierwszeństwo.
+- Kliknięcie innego przeciwnika podczas trwającego ataku nie kolejkuje kolejnego ciosu. Obecny bufor dotyczy wyłącznie ruchu.
 
 ### MEC-030: Szczór — prosty przeciwnik czasu rzeczywistego
 
@@ -188,6 +200,24 @@ Narzędzie nie jest tylko przedmiotem zwiększającym statystykę. Powinno otwie
 - Arkusz 4×4 zawiera bezczynność, bieg, ugryzienie oraz śmierć. Klatki 512×384 korzystają ze wspólnej kotwicy łap `(256, 330)` i skali mapowej 0,29.
 - Wszystkie parametry bazowe są przechowywane w `scripts/combatant_config.gd`, a Szczór korzysta z tego samego systemu celowania, obrażeń, hurtboxów i trwałego zdrowia bohatera co psy z parku.
 - Walka na mapie pozostaje w pełni czasu rzeczywistego: animacja ataku bohatera nie zatrzymuje ruchu, pościgu, czasu odnowienia ani ataków pozostałych przeciwników.
+
+### MEC-034: Łupy po walce — wdrożone
+
+- Zwykłe grupy przeciwników zostawiają jeden łup po zakończeniu całego starcia.
+- Losowanie odbywa się raz za pokonaną watahę lub legowisko, a nie osobno za każdego przeciwnika.
+- Psy mogą pozostawić starą obrożę albo adresówkę. Szczóry mogą doprowadzić do kapsli lub drobnych monet znalezionych w legowisku.
+- Monety po podniesieniu zwiększają gotówkę bez zajmowania miejsca i wagi; materialne przedmioty podlegają pojemności ekwipunku.
+- Łup z mobów pozostaje dodatkiem. Nie może zastąpić puszek, złomu i zleceń jako głównej drabiny zarobku.
+- Zadymiarz, Burek i Żul 1 mają jednorazowe tabele łupu; rewanż nie powiela ich przedmiotu.
+- Drop pojawia się na mapie i korzysta z tego samego krótkiego zasięgu, Entera, kliknięcia oraz animacji podnoszenia co puszka.
+- Szczegółowy katalog, grafiki i szanse znajdują się w `ITEMY_I_DROPY.md`.
+
+### MEC-033: Tymczasowo nieograniczony pojemnik — wdrożone
+
+- Limit miejsca i udźwigu jest chwilowo wyłączony dla wszystkich posiadanych pojemników.
+- Nominalne pojemności, wagi przedmiotów i parametry toreb pozostają zapisane; przełącznik można później ponownie włączyć bez migracji danych.
+- HUD i ekran ekwipunku pokazują w tym trybie `BEZ LIMITU`, zamiast sugerować przepełnienie.
+- Jest to świadome tymczasowe odstępstwo od `MEC-003` i podstawowej decyzji transportowej, przeznaczone do testowania dropów i dalszej zawartości.
 
 ### MEC-010: Spotkania
 
@@ -229,7 +259,7 @@ Bohater może mieć kilka aktywnych ruchów wybranych przed walką. Przykładowe
 ### MEC-024: Prototyp fizycznej walki
 
 - Dorosły zadymiarz stoi pod kioskiem. Podejście i naciśnięcie `Enter` albo kliknięcie postaci rozpoczyna prototypową walkę.
-- Bohater i jeden dorosły przeciwnik mają osobne paski życia. Prototyp nie nakłada trwałych konsekwencji po wyniku.
+- Bohater i jeden dorosły przeciwnik mają osobne paski życia. Zdrowie bohatera pozostaje po wyniku; porażka nie odbiera jeszcze pieniędzy ani przedmiotów.
 - Walki nie można rozpocząć, jeśli alkohol albo nikotyna wynosi 0. Gracz musi najpierw uzupełnić oba paski.
 - Gracz ma cztery ruchy: `Szybki cios`, `Silny atak`, `Garda` oraz `Skacz na boki`.
 - Akcje są pokazywane kolejno: animacja ruchu gracza, płynne odjęcie punktów z paska celu, krótka pauza, a następnie osobna animacja ruchu przeciwnika i jego efektu.

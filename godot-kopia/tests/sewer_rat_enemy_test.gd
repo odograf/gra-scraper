@@ -46,6 +46,7 @@ func _run() -> void:
 	player._finish_action()
 	var bite_damage: Array[int] = []
 	rat.attack_landed.connect(func(damage: int) -> void: bite_damage.append(damage))
+	game.gameplay_active = true
 	rat.active = true
 	rat.attack_cooldown_left = 0.0
 	rat.global_position = player.global_position + Vector2(44, 0)

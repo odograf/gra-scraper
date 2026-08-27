@@ -393,7 +393,7 @@ func _show_result() -> void:
 	moves_grid.visible = false
 	result_box.visible = true
 	action_name_label.text = "ZWYCIĘSTWO" if rules.result == "victory" else "PORAŻKA"
-	action_detail_label.text = "Prototyp kończy starcie bez trwałych konsekwencji. Możesz od razu rozegrać rewanż."
+	action_detail_label.text = "Stan zdrowia pozostaje po walce. Porażka nie odbiera jeszcze pieniędzy ani przedmiotów."
 	combat_resolved.emit(rules.result)
 	(result_box.get_child(0) as Button).grab_focus()
 

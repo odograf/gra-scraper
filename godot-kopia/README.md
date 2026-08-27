@@ -11,6 +11,17 @@ Gra przygodowa 2D z widokiem z góry, ręcznie rysowaną polską mapą i bohater
 
 Projekt nie wymaga żadnych dodatków do Godota.
 
+## Grywalny mockup nowego prologu
+
+Nowy układ startu jest osobną sceną i nie zastępuje jeszcze obecnej gry:
+
+1. Otwórz `scenes/melina_prologue_mockup.tscn`.
+2. Naciśnij **F6**, aby uruchomić tylko mockup.
+3. W mockupie naciśnij **F1**, aby wrócić do obecnej sceny głównej.
+4. **F5** nadal uruchamia dotychczasową grę bez zmian.
+
+Melina i przedmieście są osobnymi scenami. Drzwi po zebraniu sześciu puszek przełączają grę z `melina_prologue_mockup.tscn` do `start_suburb_mockup.tscn`, zachowując reklamówkę, puszki i zdrowie. **F2** uruchamia melinę od początku. Lista brakujących docelowych grafik znajduje się w `docs/PROLOG_MAP_MOCKUP.md`.
+
 ## Edycja mapy w Godocie
 
 Mapa jest zapisana jako osobna scena [world_map.tscn](scenes/world_map.tscn) i jest widoczna bez uruchamiania gry.
@@ -40,12 +51,12 @@ Mapa jest zapisana jako osobna scena [world_map.tscn](scenes/world_map.tscn) i j
 ## Obecna zawartość
 
 - dolny HUD: duży centralny pasek życia, mniejsze paski alkoholu i nikotyny po bokach oraz przycisk torby; informacje o pieniądzach, pojemniku i poziomie pozostają w kompaktowym panelu u góry,
-- ruch point & click z marszem po skosie, znacznikiem celu i zatrzymaniem przy kolizji,
+- ruch point & click z marszem po skosie, znacznikiem celu i zatrzymaniem przy kolizji; klik mapy podczas zamachu kolejkuje płynny ruch wykonywany zaraz po animacji,
 - pierwszy atak czasu rzeczywistego: osobna 8-klatkowa animacja zamachu reklamówką i aktywny hitbox trafiający każdy cel najwyżej raz,
 - wspólny system walki: bohater ma 100 HP, atak 10, obronę 0, zwinność 10 i zasięg 2; jego pasek życia jest widoczny w HUD-zie,
 - pierwszy pełny przeciwnik czasu rzeczywistego: dziki pies poziomu 1 z 30 HP, atakiem 5, zasięgiem 1 i nagrodą 50 XP,
 - prosty przeciwnik „Szczór”: trzy osobniki przy dolnych garażach, 12 HP, 2 obrażenia, krótki zasięg wykrywania, zapowiadane ugryzienie, 8 XP i osobna animacja śmierci,
-- jeden plik `scripts/combatant_config.gd` ustawia statystyki bohatera, wszystkich watah oraz obecnych przeciwników turowych,
+- jeden plik `scripts/combatant_config.gd` ustawia statystyki bohatera, wszystkich watah oraz obecnych przeciwników; typowana definicja zasobu sprawdza dane przed użyciem,
 - zaniedbany park za płotem w lewej dolnej części mapy z trzema watahami liczącymi kolejno 2, 3 i 4 psy,
 - kanoniczny arkusz chodu bohatera: 3 pozy na kierunek, stała skala i prawdziwe przezroczyste tło,
 - wyrównane animacje grzebania, podnoszenia puszek i zamachu: wspólna linia stóp, stabilny środek sylwetki, bez przycinania oraz z paletą dopasowaną do chodu,
@@ -59,6 +70,9 @@ Mapa jest zapisana jako osobna scena [world_map.tscn](scenes/world_map.tscn) i j
 - cztery grupy kontenerów do przeszukania,
 - subtelne podświetlenie wyłącznie najbliższej akcji i pełna obsługa świata, menu oraz dialogów klawiaturą,
 - przeszukiwanie koszy z losowym dropem puszek i drutu,
+- działające dropy po walce: watahy psów, legowiska Szczórów oraz nazwani przeciwnicy zostawiają fizyczne znajdźki podnoszone LPM lub Enterem; monety zasilają gotówkę, a pozostałe przedmioty trafiają do ekwipunku,
+- osiem przezroczystych grafik dropów: dwie puste butelki, kapsle, grosze, złotówka, obroża, adresówka i sakiewka; katalog jest w `ITEMY_I_DROPY.md`,
+- tymczasowo wyłączony limit miejsca i udźwigu pojemnika, widoczny w HUD-zie jako `BEZ LIMITU`,
 - licznik zawartości reklamówki,
 - ekwipunek z miejscem i wagą,
 - narzędzia przechowywane poza limitem pojemnika,
@@ -78,6 +92,8 @@ Mapa jest zapisana jako osobna scena [world_map.tscn](scenes/world_map.tscn) i j
 - `FAB-01 — Pierwszy kurs`: pobudka, podniesienie reklamówki, panel celu, dwa kursy do automatu, zakupy i skierowanie do Mirka,
 - modułowa mapa przygotowana pod późniejsze generowanie lokacji,
 - zadymiarz stojący pod kioskiem, z którym można rozpocząć walkę Enterem albo kliknięciem,
+- świadomy podział walki: fauna walczy na mapie w czasie rzeczywistym, a nazwani przeciwnicy fabularni przełączają grę na osobny system turowy,
+- wspólny trwały stan zdrowia i statystyk bohatera używany przez HUD oraz oba tryby walki; Siła wzmacnia również atak mapowy, a Kondycja od razu zwiększa maksymalne życie,
 - osobny prototyp walki turowej: szybki cios, ładowany silny atak, garda, trzyturowe skakanie na boki, zdrowie, przewaga, proste AI przeciwnika, rewanż i powrót na mapę,
 - sekwencyjne animacje tur: ruch gracza, płynna zmiana właściwego paska życia, pauza i dopiero potem odpowiedź przeciwnika,
 - poziomy i doświadczenie: 2 XP za podniesioną puszkę, 20 XP za wygraną walkę oraz rosnące progi awansu,

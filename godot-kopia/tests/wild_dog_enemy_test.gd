@@ -53,12 +53,19 @@ func _run() -> void:
 	dog.global_position = player.global_position + Vector2(55, 0)
 	_expect(player.attack_damage() == 10 and is_equal_approx(player.attack_range_pixels(), 128.0), "Bohater ma atak 10 i zasięg dwóch pól")
 	_expect(player.request_target_attack(dog), "Lewy klik może zlecić atak wybranego psa")
+	var retreat_position := player.global_position + Vector2(-240, 80)
+	player.set_move_target(retreat_position)
+	_expect(player.has_buffered_move_command(), "Klik mapy podczas ataku wskazanego celu trafia do kolejki")
+	_expect(not player.is_moving_to_target(), "Zakolejkowany odwrót nie przerywa animacji ataku")
 	await create_timer(0.25).timeout
 	_expect(dog.health == 20, "Atak wskazanego celu odejmuje psu 10 punktów życia")
 	await create_timer(0.43).timeout
+	_expect(player.is_moving_to_target(), "Po ataku bohater automatycznie rozpoczyna zakolejkowany odwrót")
+	_expect(player.move_target == retreat_position, "Po ataku bohater idzie do ostatnio klikniętego punktu")
 
 	var bite_damage: Array[int] = []
 	dog.attack_landed.connect(func(damage: int) -> void: bite_damage.append(damage))
+	game.gameplay_active = true
 	dog.active = true
 	dog.attack_cooldown_left = 0.0
 	dog.global_position = player.global_position + Vector2(55, 0)
@@ -68,6 +75,20 @@ func _run() -> void:
 	await create_timer(0.34).timeout
 	_expect(bite_damage == [dog.attack_damage], "Ugryzienie trafia raz w odpowiednim momencie animacji")
 	_expect(game.player_health == 95, "Ugryzienie odejmuje 5 punktów z życia bohatera w HUD-zie")
+
+	# Rozpoczęty zamach nie może dobiec do trafienia po zatrzymaniu rozgrywki modalem.
+	dog.attack_cooldown_left = 0.0
+	dog.attacking = false
+	dog.state = RealtimeEnemy.State.IDLE
+	dog.global_position = player.global_position + Vector2(55, 0)
+	dog._physics_process(0.01)
+	_expect(dog.attacking, "Pies rozpoczyna drugi atak przed otwarciem menu")
+	game.inventory_open = true
+	game._process(0.01)
+	var health_before_modal_wait: int = game.player_health
+	await create_timer(0.34).timeout
+	_expect(game.player_health == health_before_modal_wait and not dog.attacking, "Otwarcie menu anuluje oczekujące ugryzienie")
+	game.inventory_open = false
 
 	var xp_before: int = game.player_xp
 	dog.receive_realtime_hit(10, player.global_position)

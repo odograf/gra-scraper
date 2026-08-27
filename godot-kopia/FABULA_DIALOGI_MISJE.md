@@ -84,6 +84,17 @@ Elegancka kurtka, czyste buty i brudne metody. Skupuje wszystko, nie pyta o poch
 
 ## 4. Misje główne
 
+### PROLOG-00 — Melina i wyjście
+
+**Status:** grywalny mockup rozdzielony na `scenes/melina_prologue_mockup.tscn` oraz `scenes/start_suburb_mockup.tscn`; nie zastępuje jeszcze wdrożonego początku `FAB-01`
+**Cel projektowy:** sprawdzić krótszy, bardziej przestrzenny samouczek przed wejściem na właściwą mapę.
+
+Bohater budzi się w melinie szerokiej na trzy kratki. Klikany lewym przyciskiem dialog prowadzi go do reklamówki, a potem do sześciu gwarantowanych puszek. Dopiero zebranie kompletu uruchamia rozmowę o automacie i odblokowuje drzwi. Użycie drzwi zmienia aktywną scenę; reklamówka, puszki i zdrowie przechodzą do podmiejskiej przestrzeni z rozwaloną szopą, jednym psem blisko wyjścia, watahą dwóch dalej oraz czterema szczurami przy odpływie.
+
+Pełny przebieg, dokładne teksty oraz lista potrzebnych grafik są zapisane w `docs/PROLOG_MAP_MOCKUP.md`.
+
+---
+
 ### FAB-01 — Pierwszy kurs
 
 **Status:** wdrożone w prototypie; scena pobudki ma formę planszy fabularnej przed wejściem na mapę  

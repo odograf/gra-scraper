@@ -17,6 +17,10 @@ const MapResidentScript := preload("res://scripts/map_resident.gd")
 const WildDogEnemyScript := preload("res://scripts/wild_dog_enemy.gd")
 const SewerRatEnemyScript := preload("res://scripts/sewer_rat_enemy.gd")
 const CombatantConfigScript := preload("res://scripts/combatant_config.gd")
+const PlayerStateScript := preload("res://scripts/player_state.gd")
+const RealtimeEnemyDirectorScript := preload("res://scripts/realtime_enemy_director.gd")
+const ItemCatalogScript := preload("res://scripts/item_catalog.gd")
+const LootPickupScript := preload("res://scripts/loot_pickup.gd")
 const LOADING_ART := preload("res://assets/loading/map_concept.png")
 const MIREK_PORTRAIT := preload("res://assets/npcs/mirek.png")
 const ZUL_1_MAP_TEXTURE := preload("res://assets/npcs/zul_1_idle_sheet_v2.png")
@@ -62,6 +66,8 @@ enum QuestState { NOT_STARTED, NEED_CANS, HAS_SHEARS, CUT_MESH, COMPLETED }
 enum HeniekQuestState { NOT_STARTED, FIND_HENIEK, NEED_WIRE, RETURN_KEY, COMPLETED }
 
 var player: Player
+var player_state: PlayerState
+var realtime_enemy_director: RealtimeEnemyDirector
 var inventory: PlayerInventory
 var cash := 5.00
 var alcohol_level := 28.0
@@ -91,7 +97,7 @@ var starter_bag: Area2D
 var combat_enemy: Area2D
 var active_combatant_name := "zadymiarz"
 var active_combatant_id := "zadymiarz"
-var active_combatant_node: MapResident
+var active_combatant_node: Node2D
 var active_combat_xp_reward := 0
 var burek_npc: MapResident
 var zul_npc: MapResident
@@ -102,12 +108,18 @@ var sewer_rat_enemies: Array[SewerRatEnemy] = []
 var world_map: WorldMap
 var burek_defeated := false
 var zul_defeated := false
+var loot_rng := RandomNumberGenerator.new()
+var cleared_loot_groups: Dictionary = {}
+var named_loot_rolled: Dictionary = {}
 var player_level := 1
 var player_xp := 0
 var stat_points := 0
-var character_stats := CombatantConfigScript.player()
-var player_max_health := int(CombatantConfigScript.PLAYER.max_health)
-var player_health := player_max_health
+var character_stats: Dictionary:
+	get: return player_state.stats if player_state != null else CombatantConfigScript.player()
+var player_max_health: int:
+	get: return player_state.maximum_health if player_state != null else int(CombatantConfigScript.PLAYER.max_health)
+var player_health: int:
+	get: return player_state.current_health if player_state != null else int(CombatantConfigScript.PLAYER.max_health)
 
 var inventory_label: Label
 var money_label: Label
@@ -156,6 +168,14 @@ var combat_overlay: Control
 func _ready() -> void:
 	# Postacie na tej samej warstwie zasłaniają się według położenia stóp na osi Y.
 	y_sort_enabled = true
+	player_state = PlayerStateScript.new()
+	player_state.name = "StanBohatera"
+	add_child(player_state)
+	player_state.health_changed.connect(_on_player_state_health_changed)
+	realtime_enemy_director = RealtimeEnemyDirectorScript.new()
+	realtime_enemy_director.name = "RezyserPrzeciwnikow"
+	add_child(realtime_enemy_director)
+	loot_rng.randomize()
 	inventory = PlayerInventoryScript.new()
 	inventory.changed.connect(_update_ui)
 	_create_world()
@@ -167,12 +187,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	var enemies_active := gameplay_active and player_health > 0 and not _modal_open() and active_fence == null
-	for dog in wild_dog_enemies:
-		if dog != null and is_instance_valid(dog):
-			dog.active = enemies_active
-	for rat in sewer_rat_enemies:
-		if rat != null and is_instance_valid(rat):
-			rat.active = enemies_active
+	realtime_enemy_director.set_combat_active(enemies_active)
 	if not gameplay_active:
 		_set_focused_interactable(null)
 		return
@@ -187,11 +202,11 @@ func _unhandled_input(event: InputEvent) -> void:
 				get_viewport().set_input_as_handled()
 		return
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		if gameplay_active and not _modal_open() and active_fence == null and player != null and not player.is_action_busy():
+		if gameplay_active and not _modal_open() and active_fence == null and player != null:
 			var clicked_world_position := get_global_mouse_position()
 			var clicked_enemy := _realtime_enemy_at_position(clicked_world_position)
 			if clicked_enemy != null:
-				if player.request_target_attack(clicked_enemy):
+				if not player.is_action_busy() and player.request_target_attack(clicked_enemy):
 					get_viewport().set_input_as_handled()
 			elif not _click_hits_interactable(clicked_world_position):
 				clicked_world_position.x = clampf(clicked_world_position.x, 20.0, WorldMapScript.WORLD_SIZE.x - 20.0)
@@ -245,17 +260,7 @@ func _park_dog_at_position(world_position: Vector2) -> WildDogEnemy:
 	return selected
 
 func _realtime_enemy_at_position(world_position: Vector2) -> Node2D:
-	var selected: Node2D
-	var closest_distance := 64.0
-	for enemy_list in [wild_dog_enemies, sewer_rat_enemies]:
-		for enemy in enemy_list:
-			if enemy == null or not is_instance_valid(enemy) or bool(enemy.get("dead")):
-				continue
-			var distance := (enemy as Node2D).global_position.distance_to(world_position)
-			if distance <= closest_distance:
-				closest_distance = distance
-				selected = enemy as Node2D
-	return selected
+	return realtime_enemy_director.enemy_at_position(world_position)
 
 func _try_interact_nearby() -> bool:
 	_update_interaction_focus()
@@ -386,6 +391,7 @@ func _map_marker_folder(folder_path: String) -> Node:
 
 func _create_player() -> void:
 	player = PlayerScript.new()
+	player.player_state = player_state
 	player.name = "Bohater"
 	player.position = _map_marker_position("Start/Bohater", Vector2(850, 600))
 	player.z_index = 8
@@ -564,8 +570,10 @@ func _create_park_dog_packs() -> void:
 			dog.attack_landed.connect(_on_park_dog_attack)
 			dog.defeated.connect(_on_park_dog_defeated.bind(dog))
 			add_child(dog)
+			realtime_enemy_director.register_enemy(dog)
 			dog.add_to_group("park_dogs")
 			dog.add_to_group("park_pack_%d" % pack_id)
+			dog.set_meta("loot_group_id", "park_pack_%d" % pack_id)
 			wild_dog_enemies.append(dog)
 	if not wild_dog_enemies.is_empty():
 		wild_dog_enemy = wild_dog_enemies[0]
@@ -573,9 +581,7 @@ func _create_park_dog_packs() -> void:
 func _on_park_dog_attack(damage: int) -> void:
 	if player_health <= 0:
 		return
-	var defense := int(character_stats.get("defense", CombatantConfigScript.PLAYER.defense))
-	player_health = maxi(0, player_health - maxi(1, damage - defense))
-	_update_ui()
+	player_state.apply_damage(damage)
 	if player_health <= 0:
 		player.cancel_move_target()
 		_show_message("Psy cię powaliły. Potrzebujesz pomocy, zanim ruszysz dalej.", true)
@@ -587,6 +593,9 @@ func _on_park_dog_defeated(dog: WildDogEnemy) -> void:
 	var text := "Pokonano psa: +%d XP." % dog.xp_reward
 	if levels_gained > 0:
 		text += " Awans: poziom %d!" % player_level
+	var loot_name := _try_spawn_group_loot(String(dog.get_meta("loot_group_id", "")), "park_dog_pack", dog.global_position)
+	if not loot_name.is_empty():
+		text += " Wataha zostawiła: %s." % loot_name
 	_show_message(text)
 
 func _create_sewer_rats() -> void:
@@ -605,15 +614,17 @@ func _create_sewer_rats() -> void:
 		rat.attack_landed.connect(_on_sewer_rat_attack)
 		rat.defeated.connect(_on_sewer_rat_defeated.bind(rat))
 		add_child(rat)
+		realtime_enemy_director.register_enemy(rat)
 		rat.add_to_group("sewer_rats")
+		var rat_group := int(marker.get_meta("rat_group", 1))
+		rat.add_to_group("sewer_rat_group_%d" % rat_group)
+		rat.set_meta("loot_group_id", "sewer_rat_group_%d" % rat_group)
 		sewer_rat_enemies.append(rat)
 
 func _on_sewer_rat_attack(damage: int) -> void:
 	if player_health <= 0:
 		return
-	var defense := int(character_stats.get("defense", CombatantConfigScript.PLAYER.defense))
-	player_health = maxi(0, player_health - maxi(1, damage - defense))
-	_update_ui()
+	player_state.apply_damage(damage)
 	if player_health <= 0:
 		player.cancel_move_target()
 		_show_message("Szczóry cię powaliły. Potrzebujesz pomocy, zanim ruszysz dalej.", true)
@@ -625,7 +636,73 @@ func _on_sewer_rat_defeated(rat: SewerRatEnemy) -> void:
 	var text := "Pokonano Szczóra: +%d XP." % rat.xp_reward
 	if levels_gained > 0:
 		text += " Awans: poziom %d!" % player_level
+	var loot_name := _try_spawn_group_loot(String(rat.get_meta("loot_group_id", "")), "sewer_rat_nest", rat.global_position)
+	if not loot_name.is_empty():
+		text += " W legowisku pojawił się łup: %s." % loot_name
 	_show_message(text)
+
+func _try_spawn_group_loot(group_id: String, table_id: String, drop_position: Vector2) -> String:
+	if group_id.is_empty() or cleared_loot_groups.has(group_id):
+		return ""
+	for member in get_tree().get_nodes_in_group(group_id):
+		if is_instance_valid(member) and member is RealtimeEnemy and not (member as RealtimeEnemy).dead:
+			return ""
+	cleared_loot_groups[group_id] = true
+	return _spawn_loot_from_table(table_id, drop_position)
+
+func _spawn_named_loot_once(combatant_id: String, drop_position: Vector2) -> String:
+	if named_loot_rolled.has(combatant_id) or not ItemCatalogScript.LOOT_TABLES.has(combatant_id):
+		return ""
+	named_loot_rolled[combatant_id] = true
+	return _spawn_loot_from_table(combatant_id, drop_position)
+
+func _spawn_loot_from_table(table_id: String, drop_position: Vector2) -> String:
+	var item_id := ItemCatalogScript.roll(table_id, loot_rng)
+	if item_id.is_empty():
+		return ""
+	_spawn_loot(item_id, drop_position)
+	return ItemCatalogScript.display_name(item_id)
+
+func _spawn_loot(item_id: String, drop_position: Vector2) -> LootPickup:
+	var definition := ItemCatalogScript.definition(item_id)
+	if definition.is_empty() or not definition.has("texture"):
+		push_error("Brak definicji grafiki łupu: %s" % item_id)
+		return null
+	var loot := LootPickupScript.new() as LootPickup
+	loot.name = "Drop_%s_%d" % [item_id, get_tree().get_node_count_in_group("loot_pickup") + 1]
+	loot.position = drop_position
+	loot.z_index = 9
+	loot.player = player
+	loot.item_id = item_id
+	loot.display_name = ItemCatalogScript.display_name(item_id)
+	loot.item_texture = definition.texture as Texture2D
+	if ItemCatalogScript.is_direct_cash(item_id):
+		loot.cash_cents = ItemCatalogScript.roll_cash_cents(item_id, loot_rng)
+	loot.can_accept_callback = func() -> bool:
+		return fab01_bag_picked and (ItemCatalogScript.is_direct_cash(item_id) or inventory.can_add(item_id))
+	loot.collected.connect(_on_loot_collected)
+	loot.out_of_range.connect(func() -> void: _show_message("Podejdź bliżej, żeby podnieść %s." % loot.display_name, true))
+	loot.inventory_full.connect(_on_loot_inventory_blocked.bind(loot.display_name))
+	add_child(loot)
+	return loot
+
+func _on_loot_collected(item_id: String, cash_cents: int) -> void:
+	var item_name := ItemCatalogScript.display_name(item_id)
+	if cash_cents > 0:
+		cash += float(cash_cents) / 100.0
+		_show_message("Podniesiono: %s  •  +%s." % [item_name, _money(float(cash_cents) / 100.0)])
+	elif inventory.add_item(item_id):
+		_show_message("Podniesiono: %s." % item_name)
+	else:
+		return
+	_consume_needs(LIGHT_ACTION_COST)
+	_update_ui()
+
+func _on_loot_inventory_blocked(item_name: String) -> void:
+	if not fab01_bag_picked:
+		_show_message("Najpierw podnieś reklamówkę, żeby zabrać %s." % item_name, true)
+	else:
+		_show_message("Nie udało się schować: %s." % item_name, true)
 
 func _create_trash_container(node_name: String, container_position: Vector2, guaranteed_wire := false) -> TrashSearch:
 	var container := TrashSearchScript.new() as TrashSearch
@@ -705,9 +782,12 @@ func _create_hud(canvas: CanvasLayer) -> void:
 
 	bottom_hud_panel = PanelContainer.new()
 	bottom_hud_panel.name = "DolnyHUD"
-	bottom_hud_panel.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	bottom_hud_panel.offset_left = 120
-	bottom_hud_panel.offset_right = -120
+	bottom_hud_panel.anchor_left = 0.06
+	bottom_hud_panel.anchor_right = 0.94
+	bottom_hud_panel.anchor_top = 1.0
+	bottom_hud_panel.anchor_bottom = 1.0
+	bottom_hud_panel.offset_left = 0
+	bottom_hud_panel.offset_right = 0
 	bottom_hud_panel.offset_top = -132
 	bottom_hud_panel.offset_bottom = -16
 	bottom_hud_panel.add_theme_stylebox_override("panel", _hud_panel_style())
@@ -910,8 +990,14 @@ func _create_heniek_ui(canvas: CanvasLayer) -> void:
 
 func _create_action_ui(canvas: CanvasLayer) -> void:
 	action_panel = PanelContainer.new()
-	action_panel.position = Vector2(430, 485)
-	action_panel.custom_minimum_size = Vector2(420, 80)
+	action_panel.anchor_left = 0.5
+	action_panel.anchor_right = 0.5
+	action_panel.anchor_top = 1.0
+	action_panel.anchor_bottom = 1.0
+	action_panel.offset_left = -210
+	action_panel.offset_right = 210
+	action_panel.offset_top = -235
+	action_panel.offset_bottom = -155
 	action_panel.add_theme_stylebox_override("panel", _panel_style(Color("#181b19ee")))
 	action_panel.visible = false
 	canvas.add_child(action_panel)
@@ -955,12 +1041,11 @@ func _open_combat_prototype(combatant_id := "zadymiarz", enemy_art: Texture2D = 
 	combat_open = true
 	active_combatant_name = String(enemy_config.display_name).to_lower()
 	active_combatant_id = combatant_id
-	active_combatant_node = combatant_node as MapResident
+	active_combatant_node = combatant_node
 	active_combat_xp_reward = int(enemy_config.xp_reward)
 	_set_focused_interactable(null)
 	player.set_physics_process(false)
-	var combat_stats := character_stats.duplicate(true)
-	combat_stats["current_health"] = player_health
+	var combat_stats := player_state.combat_snapshot()
 	combat_overlay.set_player_stats(combat_stats)
 	combat_overlay.configure_enemy_from_definition(enemy_config, enemy_art)
 	combat_overlay.start_fight()
@@ -974,8 +1059,9 @@ func _close_combat_prototype() -> void:
 	_show_message("Walka zakończona. %s nadal jest na mapie." % active_combatant_name.capitalize())
 
 func _on_player_health_changed(current_health: int, max_health: int) -> void:
-	player_max_health = max_health
-	player_health = clampi(current_health, 0, player_max_health)
+	player_state.synchronize_health(current_health, max_health)
+
+func _on_player_state_health_changed(_current_health: int, _max_health: int) -> void:
 	_update_ui()
 
 func _on_combat_exit_requested(_result: String) -> void:
@@ -983,12 +1069,15 @@ func _on_combat_exit_requested(_result: String) -> void:
 
 func _on_combat_resolved(combat_result: String) -> void:
 	if combat_result == "victory":
+		var loot_position := player.global_position + Vector2(42, 0)
+		if active_combatant_node != null and is_instance_valid(active_combatant_node):
+			loot_position = active_combatant_node.global_position
 		if active_combatant_id == "burek":
 			burek_defeated = true
 		elif active_combatant_id == "zul_1":
 			zul_defeated = true
-		if active_combatant_node != null and is_instance_valid(active_combatant_node):
-			active_combatant_node.set_fight_enabled(false)
+		if active_combatant_node is MapResident:
+			(active_combatant_node as MapResident).set_fight_enabled(false)
 			var defeated_position := active_combatant_node.position
 			if active_combatant_id == "burek":
 				defeated_position = _map_marker_position("StanyNPC/BurekPoWalce", BUREK_DEFEATED_POSITION)
@@ -999,6 +1088,9 @@ func _on_combat_resolved(combat_result: String) -> void:
 			retreat.tween_property(active_combatant_node, "position", defeated_position, 0.7)
 		var levels_gained := _award_xp(active_combat_xp_reward, "wygraną walkę")
 		var reward_text := "+%d XP ZA ZWYCIĘSTWO" % active_combat_xp_reward
+		var loot_name := _spawn_named_loot_once(active_combatant_id, loot_position)
+		if not loot_name.is_empty():
+			reward_text += "  •  DROP: %s" % loot_name.to_upper()
 		if levels_gained > 0:
 			reward_text += "  •  AWANS! POZIOM %d  •  +%d PUNKT STATYSTYKI" % [player_level, levels_gained]
 		combat_overlay.show_reward_text(reward_text)
@@ -1010,7 +1102,7 @@ func _on_can_collected() -> void:
 	if not fab01_first_can_seen:
 		fab01_first_can_seen = true
 		_show_message("Sześćdziesiąt groszy. Jeszcze kilka i człowiek zaczyna liczyć w puszkach.")
-	elif inventory.used_space() >= inventory.capacity():
+	elif PlayerInventory.LIMITS_ENABLED and inventory.used_space() >= inventory.capacity():
 		_show_message("Pełna. Więcej nie wejdzie, choćbym ją przekonywał.", true)
 	else:
 		_show_message("Podniesiono puszkę: %d szt." % inventory.item_count("can"))
@@ -1116,7 +1208,10 @@ func _close_inventory() -> void:
 func _rebuild_inventory_ui() -> void:
 	_clear_container(inventory_box)
 	inventory_box.add_child(_label("EKWIPUNEK I ROZWÓJ", 24, Color("#efb647")))
-	inventory_box.add_child(_label("%s  •  miejsce %d/%d  •  waga %.2f/%.1f kg" % [inventory.container_name(), inventory.used_space(), inventory.capacity(), inventory.current_weight(), inventory.max_weight()], 14, Color("#eee6d7")))
+	var limits_text := "miejsce %d/%d  •  waga %.2f/%.1f kg" % [inventory.used_space(), inventory.capacity(), inventory.current_weight(), inventory.max_weight()]
+	if not PlayerInventory.LIMITS_ENABLED:
+		limits_text = "miejsce bez limitu  •  waga bez limitu (aktualnie %.2f kg)" % inventory.current_weight()
+	inventory_box.add_child(_label("%s  •  %s" % [inventory.container_name(), limits_text], 14, Color("#eee6d7")))
 	inventory_box.add_child(HSeparator.new())
 	var columns := HBoxContainer.new()
 	columns.add_theme_constant_override("separation", 20)
@@ -1128,6 +1223,13 @@ func _rebuild_inventory_ui() -> void:
 	columns.add_child(equipment_column)
 	equipment_column.add_child(_label("PRZEDMIOTY", 13, Color("#d8c69b")))
 	equipment_column.add_child(_label("Puszki: %d  •  Siatka: %d  •  Drut: %d" % [inventory.item_count("can"), inventory.item_count("mesh"), inventory.item_count("wire")], 14, Color("#eee6d7")))
+	var loot_lines: Array[String] = []
+	for item_id in ["empty_beer_bottle", "empty_vodka_bottle", "bottle_caps", "dog_collar", "dog_tag", "coin_pouch"]:
+		var amount := inventory.item_count(item_id)
+		if amount > 0:
+			loot_lines.append("%s: %d" % [ItemCatalogScript.display_name(item_id), amount])
+	if not loot_lines.is_empty():
+		equipment_column.add_child(_label("ŁUPY\n" + "  •  ".join(loot_lines), 13, Color("#d7b878")))
 	equipment_column.add_child(_label("NARZĘDZIA — nie zajmują miejsca ani udźwigu", 13, Color("#d8c69b")))
 	var tool_text := "Brak"
 	if inventory.tools.has("metal_shears"):
@@ -1200,7 +1302,8 @@ func _award_xp(amount: int, source: String) -> int:
 func _increase_stat(stat_id: String) -> void:
 	if stat_points <= 0 or not character_stats.has(stat_id):
 		return
-	character_stats[stat_id] = int(character_stats[stat_id]) + 1
+	if not player_state.increase_stat(StringName(stat_id)):
+		return
 	stat_points -= 1
 	_update_ui()
 	_rebuild_inventory_ui()
@@ -1716,7 +1819,10 @@ func _update_ui() -> void:
 	money_label.text = _money(cash)
 	if fab01_bag_picked:
 		var quest_item_text := "  •  KLUCZ DO ŻUKA" if inventory.item_count("zuk_key") > 0 else ""
-		inventory_label.text = "%s: %d/%d miejsc\n%.2f/%.1f kg  •  puszki: %d  •  siatka: %d  •  drut: %d%s" % [inventory.container_name().to_upper(), inventory.used_space(), inventory.capacity(), inventory.current_weight(), inventory.max_weight(), inventory.item_count("can"), inventory.item_count("mesh"), inventory.item_count("wire"), quest_item_text]
+		if PlayerInventory.LIMITS_ENABLED:
+			inventory_label.text = "%s: %d/%d miejsc\n%.2f/%.1f kg  •  puszki: %d  •  siatka: %d  •  drut: %d%s" % [inventory.container_name().to_upper(), inventory.used_space(), inventory.capacity(), inventory.current_weight(), inventory.max_weight(), inventory.item_count("can"), inventory.item_count("mesh"), inventory.item_count("wire"), quest_item_text]
+		else:
+			inventory_label.text = "%s: BEZ LIMITU\n%.2f kg  •  puszki: %d  •  siatka: %d  •  drut: %d%s" % [inventory.container_name().to_upper(), inventory.current_weight(), inventory.item_count("can"), inventory.item_count("mesh"), inventory.item_count("wire"), quest_item_text]
 	else:
 		inventory_label.text = "BRAK POJEMNIKA\nPodnieś reklamówkę leżącą obok bohatera."
 	progression_label.text = "POZIOM %d  •  XP %d/%d  •  PUNKTY: %d" % [player_level, player_xp, _xp_for_next_level(), stat_points]
@@ -1881,12 +1987,17 @@ func _modal_overlay(canvas: CanvasLayer, node_name: String) -> Control:
 	overlay.add_child(shade)
 	return overlay
 
-func _modal_panel(overlay: Control, position: Vector2, size: Vector2) -> PanelContainer:
+func _modal_panel(overlay: Control, _legacy_position: Vector2, size: Vector2) -> PanelContainer:
+	var center := CenterContainer.new()
+	center.name = "WycentrowanyPanel"
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	overlay.add_child(center)
 	var panel := PanelContainer.new()
-	panel.position = position
 	panel.custom_minimum_size = size
+	panel.mouse_filter = Control.MOUSE_FILTER_STOP
 	panel.add_theme_stylebox_override("panel", _panel_style(Color("#242822")))
-	overlay.add_child(panel)
+	center.add_child(panel)
 	return panel
 
 func _money(value: float) -> String:
@@ -2017,11 +2128,13 @@ func _show_fab01_intro() -> void:
 	shade.color = Color("#080908f7")
 	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	fab01_intro_overlay.add_child(shade)
+	var center := CenterContainer.new()
+	center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	fab01_intro_overlay.add_child(center)
 	var panel := PanelContainer.new()
-	panel.position = Vector2(235, 125)
 	panel.custom_minimum_size = Vector2(810, 470)
 	panel.add_theme_stylebox_override("panel", _classic_dialogue_style())
-	fab01_intro_overlay.add_child(panel)
+	center.add_child(panel)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 16)
 	panel.add_child(box)

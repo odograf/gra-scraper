@@ -3,12 +3,12 @@ extends RefCounted
 
 signal changed
 
-const ITEMS := {
-	"can": {"name": "Puszka", "space": 1, "weight": 0.03},
-	"mesh": {"name": "Fragment siatki", "space": 4, "weight": 4.0},
-	"wire": {"name": "Kawałek drutu", "space": 1, "weight": 0.20},
-	"zuk_key": {"name": "Klucz do Żuka", "space": 0, "weight": 0.0}
-}
+const ItemCatalogScript := preload("res://scripts/item_catalog.gd")
+const ITEMS := ItemCatalogScript.ITEMS
+
+# Tymczasowy przełącznik prototypowy. Definicje pojemników pozostają zachowane,
+# aby późniejsze przywrócenie limitów nie wymagało migracji ekwipunku.
+const LIMITS_ENABLED := false
 
 const CONTAINERS := {
 	"plastic_bag": {"name": "Reklamówka", "capacity": 6, "max_weight": 4.0, "price": 0.0},
@@ -18,7 +18,11 @@ const CONTAINERS := {
 
 const TOOL_MAX_DURABILITY := {"metal_shears": 6}
 
-var items := {"can": 0, "mesh": 0, "wire": 0, "zuk_key": 0}
+var items := {
+	"can": 0, "mesh": 0, "wire": 0, "zuk_key": 0,
+	"empty_beer_bottle": 0, "empty_vodka_bottle": 0, "bottle_caps": 0,
+	"dog_collar": 0, "dog_tag": 0, "coin_pouch": 0
+}
 var owned_containers := {"plastic_bag": true}
 var equipped_container := "plastic_bag"
 var tools: Dictionary = {}
@@ -52,6 +56,8 @@ func container_name() -> String:
 func can_add(item_id: String, amount := 1) -> bool:
 	if not ITEMS.has(item_id) or amount <= 0:
 		return false
+	if not LIMITS_ENABLED:
+		return true
 	var definition: Dictionary = ITEMS[item_id]
 	var next_space := used_space() + int(definition.space) * amount
 	var next_weight := current_weight() + float(definition.weight) * amount
@@ -81,6 +87,8 @@ func add_container(container_id: String) -> bool:
 func can_equip_container(container_id: String) -> bool:
 	if not owned_containers.has(container_id):
 		return false
+	if not LIMITS_ENABLED:
+		return true
 	var definition: Dictionary = CONTAINERS[container_id]
 	return used_space() <= int(definition.capacity) and current_weight() <= float(definition.max_weight)
 

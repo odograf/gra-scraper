@@ -26,6 +26,20 @@ const TARGET_ATTACK_DURATION := 0.64
 const IDLE_COLUMNS := [1]
 const WALK_COLUMNS := [0, 1, 2, 1]
 const DIRECTIONS := ["down", "left", "right", "up"]
+const LOCOMOTION_FRAME_ANCHORS := {
+	"move:0:0": Vector2(322.5617, 304.0),
+	"move:0:1": Vector2(308.1199, 299.0),
+	"move:0:2": Vector2(324.2269, 290.0),
+	"move:0:3": Vector2(313.5406, 295.0),
+	"move:1:0": Vector2(216.5713, 303.0),
+	"move:1:1": Vector2(209.8179, 304.0),
+	"move:1:2": Vector2(225.9834, 300.0),
+	"move:1:3": Vector2(210.8736, 288.0),
+	"move:2:0": Vector2(113.4649, 304.0),
+	"move:2:1": Vector2(87.4574, 304.0),
+	"move:2:2": Vector2(115.6317, 293.0),
+	"move:2:3": Vector2(106.5467, 295.0),
+}
 
 var facing := "down"
 var sprite: AnimatedSprite2D
@@ -35,11 +49,14 @@ var current_action := ""
 var action_timer: Timer
 var move_target := Vector2.ZERO
 var has_move_target := false
+var queued_move_target := Vector2.ZERO
+var has_queued_move_target := false
 var stuck_time := 0.0
 var target_marker: Line2D
 var attack_hitbox: Area2D
 var hit_targets: Dictionary = {}
 var queued_attack_target: Node2D
+var player_state: PlayerState
 
 func _ready() -> void:
 	collision_layer = 2
@@ -97,7 +114,17 @@ func _physics_process(delta: float) -> void:
 
 func set_move_target(target: Vector2) -> void:
 	if action_locked:
+		# Ostatni klik podczas animacji zastępuje poprzednią komendę. Bohater
+		# kończy akcję, a następnie rusza bez potrzeby ponownego klikania.
+		queued_attack_target = null
+		queued_move_target = target
+		has_queued_move_target = true
+		target_marker.global_position = target
+		target_marker.visible = true
 		return
+	_apply_move_target(target)
+
+func _apply_move_target(target: Vector2) -> void:
 	queued_attack_target = null
 	move_target = target
 	has_move_target = true
@@ -105,16 +132,21 @@ func set_move_target(target: Vector2) -> void:
 	target_marker.global_position = move_target
 	target_marker.visible = true
 
-func cancel_move_target(clear_queued_attack := true) -> void:
+func cancel_move_target(clear_queued_attack := true, clear_queued_move := true) -> void:
 	has_move_target = false
 	stuck_time = 0.0
 	if clear_queued_attack:
 		queued_attack_target = null
-	if target_marker != null:
+	if clear_queued_move:
+		has_queued_move_target = false
+	if target_marker != null and not has_queued_move_target:
 		target_marker.visible = false
 
 func is_moving_to_target() -> bool:
 	return has_move_target
+
+func has_buffered_move_command() -> bool:
+	return has_queued_move_target
 
 func start_spin_attack() -> bool:
 	if action_locked:
@@ -138,6 +170,8 @@ func request_target_attack(target: Node2D) -> bool:
 	return true
 
 func attack_damage() -> int:
+	if player_state != null:
+		return player_state.realtime_attack_damage()
 	return int(CombatantConfigScript.PLAYER.attack)
 
 func attack_range_pixels() -> float:
@@ -241,7 +275,13 @@ func _finish_action() -> void:
 		attack_hitbox.monitoring = false
 	action_locked = false
 	current_action = ""
-	sprite.play("idle_" + facing)
+	if has_queued_move_target:
+		var buffered_target := queued_move_target
+		has_queued_move_target = false
+		_apply_move_target(buffered_target)
+		_update_animation((buffered_target - global_position).normalized())
+	else:
+		sprite.play("idle_" + facing)
 	action_finished.emit(finished_action)
 
 func _create_shadow() -> void:
@@ -354,32 +394,10 @@ func _calculate_bag_hammer_anchors() -> void:
 		frame_anchors["bag_hammer:%d" % frame_index] = Vector2(320, 420)
 
 func _calculate_locomotion_anchors() -> void:
-	var image := LOCOMOTION_SHEET.get_image()
-	for row in range(4):
-		for column in range(LOCOMOTION_COLUMNS):
-			var min_y := LOCOMOTION_FRAME_SIZE.y
-			var max_y := 0
-			for y in range(LOCOMOTION_FRAME_SIZE.y):
-				for x in range(LOCOMOTION_FRAME_SIZE.x):
-					if image.get_pixel(column * LOCOMOTION_FRAME_SIZE.x + x, row * LOCOMOTION_FRAME_SIZE.y + y).a > 0.12:
-						min_y = mini(min_y, y)
-						max_y = maxi(max_y, y)
-
-			# Górny fragment sylwetki zawiera głowę, ale nie reklamówkę.
-			# Jej środek jest stabilniejszym punktem odniesienia niż środek całego obrazka.
-			var head_end := mini(max_y, min_y + 72)
-			var weighted_x := 0.0
-			var total_alpha := 0.0
-			for y in range(min_y, head_end + 1):
-				for x in range(LOCOMOTION_FRAME_SIZE.x):
-					var alpha := image.get_pixel(column * LOCOMOTION_FRAME_SIZE.x + x, row * LOCOMOTION_FRAME_SIZE.y + y).a
-					if alpha > 0.12:
-						weighted_x += float(x) * alpha
-						total_alpha += alpha
-			var anchor_x := float(LOCOMOTION_FRAME_SIZE.x) * 0.5
-			if total_alpha > 0.0:
-				anchor_x = weighted_x / total_alpha
-			frame_anchors["move:%d:%d" % [column, row]] = Vector2(anchor_x, max_y)
+	# Kotwice są wyliczane przez narzędzie przygotowujące arkusz, a nie przy każdym
+	# uruchomieniu gry. Usuwa to ponad milion odczytów pikseli ze ścieżki startowej.
+	for anchor_key in LOCOMOTION_FRAME_ANCHORS:
+		frame_anchors[anchor_key] = LOCOMOTION_FRAME_ANCHORS[anchor_key]
 
 func _apply_frame_alignment() -> void:
 	if sprite == null:

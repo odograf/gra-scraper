@@ -13,6 +13,7 @@ func _run() -> void:
 
 	_expect(game.bottom_hud_panel != null, "Dolna konsola HUD istnieje")
 	_expect(is_equal_approx(game.bottom_hud_panel.anchor_bottom, 1.0), "HUD jest zakotwiczony do dołu ekranu")
+	_expect(game.bottom_hud_panel.anchor_left > 0.0 and game.bottom_hud_panel.anchor_right < 1.0, "HUD używa proporcjonalnych marginesów zamiast sztywnej pozycji")
 	_expect(game.bottom_hud_panel.is_ancestor_of(game.health_bar), "Pasek życia znajduje się w dolnym HUD-zie")
 	_expect(game.bottom_hud_panel.is_ancestor_of(game.alcohol_bar), "Pasek alkoholu znajduje się w dolnym HUD-zie")
 	_expect(game.bottom_hud_panel.is_ancestor_of(game.nicotine_bar), "Pasek nikotyny znajduje się w dolnym HUD-zie")
@@ -20,6 +21,8 @@ func _run() -> void:
 	_expect(game.health_bar.custom_minimum_size.y > game.nicotine_bar.custom_minimum_size.y, "Życie pozostaje dominującym paskiem")
 	_expect(game.bag_hud_button != null and game.bag_hud_button.icon != null, "HUD ma przycisk z ikoną torby")
 	_expect(game.health_bar.value == 100.0 and game.alcohol_bar.value == 28.0 and game.nicotine_bar.value == 24.0, "Dolne paski pokazują aktualne wartości zasobów")
+	_expect(game.store_overlay.find_child("WycentrowanyPanel", true, false) is CenterContainer, "Okna modalne są centrowane przez kontener")
+	_expect(is_equal_approx(game.action_panel.anchor_left, 0.5) and is_equal_approx(game.action_panel.anchor_bottom, 1.0), "Pasek czynności jest zakotwiczony względem środka i dołu")
 
 	game.fab01_bag_picked = true
 	game._on_hud_bag_pressed()
