@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://c1bqyhvddsamr"]
+
+[ext_resource type="Script" uid="uid://clwes7yp41127" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="PackedScene" uid="uid://bcbs8s2kcyoeb" path="res://scenes/world_map.tscn" id="2_world"]
+
+[node name="Main" type="Node2D" unique_id=1585831275]
+script = ExtResource("1_main")
+
+[node name="Osiedle" parent="." unique_id=1805184768 instance=ExtResource("2_world")]
+position = Vector2(600, 36)

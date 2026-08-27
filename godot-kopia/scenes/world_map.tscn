@@ -1,0 +1,1442 @@
+[gd_scene format=4 uid="uid://bcbs8s2kcyoeb"]
+
+[ext_resource type="Script" uid="uid://cfdkii3qrld1v" path="res://scripts/world_map.gd" id="1_0hitc"]
+[ext_resource type="TileSet" uid="uid://bcomvo024es0q" path="res://assets/terrain/terrain_tileset_v1.tres" id="2_6a477"]
+[ext_resource type="Texture2D" uid="uid://40t3hj07f656" path="res://assets/buildings/zuk_gnojarz_v1.png" id="3_1xmgx"]
+[ext_resource type="Texture2D" uid="uid://qrxb0pnlwyac" path="res://assets/buildings/kiosk_v1.png" id="4_jc8yp"]
+[ext_resource type="Texture2D" uid="uid://0xprpwj1doi8" path="res://assets/props/mirek_zuk_front_v1.png" id="5_c7uu0"]
+[ext_resource type="Texture2D" uid="uid://btfcieehgvpvd" path="res://assets/props/crate_cans_v1.png" id="6_fsuak"]
+[ext_resource type="Texture2D" uid="uid://bkkrm8kxpmv4t" path="res://assets/props/crate_scrap_v1.png" id="7_xdla5"]
+[ext_resource type="Texture2D" uid="uid://dalh17k34x85y" path="res://assets/props/fence_segments_v1.png" id="8_gsxuc"]
+[ext_resource type="Texture2D" uid="uid://bmb5ixgwx5hca" path="res://assets/animals/wild_emaciated_dog_sheet_v2_packed.png" id="9_d3p07"]
+[ext_resource type="Texture2D" uid="uid://wyd58jjwtx4o" path="res://assets/items/crushed_can.png" id="10_d8vbv"]
+[ext_resource type="Texture2D" path="res://assets/animals/sewer_rat_sheet_v1.png" id="11_rat"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ekvh6"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_1ra3e"]
+size = Vector2(2858, 173)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hbiaa"]
+size = Vector2(2860, 45)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qwkcd"]
+size = Vector2(45, 1600)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3v1tn"]
+size = Vector2(45, 1600)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_a1fuh"]
+size = Vector2(620, 350)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wl71g"]
+size = Vector2(290, 213)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_qeq5b"]
+size = Vector2(225, 118)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_yj2db"]
+size = Vector2(240, 130)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_c8vak"]
+size = Vector2(240, 130)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ojuhd"]
+size = Vector2(240, 130)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_o77pg"]
+size = Vector2(280, 108)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_t82kb"]
+size = Vector2(180, 105)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_h33lm"]
+size = Vector2(174, 105)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_8fygl"]
+size = Vector2(118, 205)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_0bjbu"]
+size = Vector2(118, 205)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_mqlt1"]
+size = Vector2(330, 155)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_vsl5p"]
+size = Vector2(470, 170)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_c5up0"]
+size = Vector2(338, 28)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_oj5pu"]
+size = Vector2(108, 28)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_4gnoo"]
+size = Vector2(440, 28)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ksv32"]
+radius = 28.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_7xmex"]
+radius = 48.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_62d7k"]
+radius = 52.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ef0lx"]
+radius = 48.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_y360i"]
+radius = 55.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_074pg"]
+radius = 30.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_5d3s6"]
+radius = 32.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_kkqtg"]
+radius = 31.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ijmin"]
+radius = 29.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_hglhk"]
+radius = 34.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_c12k4"]
+radius = 31.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_vaewu"]
+radius = 34.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hswgs"]
+size = Vector2(120, 30)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jmy5t"]
+size = Vector2(120, 30)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ktbr8"]
+atlas = ExtResource("8_gsxuc")
+region = Rect2(0, 0, 724, 724)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hrwdy"]
+atlas = ExtResource("8_gsxuc")
+region = Rect2(0, 0, 724, 724)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6f8wg"]
+atlas = ExtResource("8_gsxuc")
+region = Rect2(0, 0, 724, 724)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3d1ul"]
+atlas = ExtResource("8_gsxuc")
+region = Rect2(0, 0, 724, 724)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_onckp"]
+atlas = ExtResource("8_gsxuc")
+region = Rect2(0, 0, 724, 724)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_aulxf"]
+atlas = ExtResource("8_gsxuc")
+region = Rect2(0, 0, 724, 724)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x5om6"]
+atlas = ExtResource("8_gsxuc")
+region = Rect2(0, 0, 724, 724)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d03j4"]
+atlas = ExtResource("8_gsxuc")
+region = Rect2(0, 0, 724, 724)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_i2chw"]
+atlas = ExtResource("9_d3p07")
+region = Rect2(0, 0, 512, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gfrpi"]
+atlas = ExtResource("9_d3p07")
+region = Rect2(0, 0, 512, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0kgxu"]
+atlas = ExtResource("9_d3p07")
+region = Rect2(0, 0, 512, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_m4233"]
+atlas = ExtResource("9_d3p07")
+region = Rect2(0, 0, 512, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qlplm"]
+atlas = ExtResource("9_d3p07")
+region = Rect2(0, 0, 512, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ws1lj"]
+atlas = ExtResource("9_d3p07")
+region = Rect2(0, 0, 512, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_10135"]
+atlas = ExtResource("9_d3p07")
+region = Rect2(0, 0, 512, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8x0n6"]
+atlas = ExtResource("9_d3p07")
+region = Rect2(0, 0, 512, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6f7ja"]
+atlas = ExtResource("9_d3p07")
+region = Rect2(0, 0, 512, 384)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rat_idle"]
+atlas = ExtResource("11_rat")
+region = Rect2(0, 0, 512, 384)
+
+[node name="Osiedle" type="Node2D" unique_id=375797229]
+editor_description = "Edytowalna mapa. Podłoże maluj na warstwie TerenBazowy; pozycje obiektów zmieniaj w PunktyRozgrywki."
+y_sort_enabled = true
+script = ExtResource("1_0hitc")
+editable_scene = true
+
+[node name="TerenBazowy" type="TileMapLayer" parent="." unique_id=762793331]
+z_index = -10
+texture_filter = 4
+material = SubResource("ShaderMaterial_ekvh6")
+tile_map_data = PackedByteArray("AAADAAAAAAAAAAAAAAAEAAAAAAACAAAAAAAFAAAAAAABAAAAAAAGAAAAAAAAAAAAAAAHAAAAAAACAAAAAAAIAAAAAAABAAAAAAAJAAAAAAAAAAAAAAAKAAAAAAACAAAAAAALAAAAAAABAAAAAAAMAAAAAAADAAAAAAANAAAAAAAGAAAAAAAOAAAAAAAHAAAAAAAPAAAAAAAEAAAAAAAQAAAAAAACAAAAAAARAAAAAAABAAAAAAASAAAAAAAAAAAAAAATAAAAAAACAAAAAAAUAAAAAAABAAAAAAAVAAAAAAAAAAAAAAAAAAEAAAABAAAAAAABAAEAAAAAAAAAAAADAAEAAAABAAAAAAAEAAEAAAAAAAAAAAAFAAEAAAACAAAAAAAGAAEAAAAGAAEAAAAHAAEAAAACAAEAAAAIAAEAAAACAAEAAAAJAAEAAAAHAAEAAAAKAAEAAAAAAAAAAAALAAEAAAACAAAAAAAMAAEAAAAEAAAAAAANAAEAAAAFAAAAAAAOAAEAAAAGAAAAAAAPAAEAAAADAAAAAAAQAAEAAAAAAAAAAAARAAEAAAACAAAAAAASAAEAAAABAAAAAAATAAEAAAAAAAAAAAAUAAEAAAACAAAAAAAVAAEAAAABAAAAAAAAAAIAAAACAAAAAAABAAIAAAABAAAAAAACAAIAAAAAAAAAAAADAAIAAAACAAAAAAAEAAIAAAABAAAAAAAFAAIAAAAAAAAAAAAGAAIAAAABAAEAAAAHAAIAAAAEAAAAAAAIAAIAAAADAAAAAAAJAAIAAAADAAEAAAAKAAIAAAABAAAAAAALAAIAAAAAAAAAAAAMAAIAAAADAAAAAAANAAIAAAAHAAAAAAAOAAIAAAAFAAAAAAAPAAIAAAAEAAAAAAAQAAIAAAABAAAAAAARAAIAAAAAAAAAAAASAAIAAAACAAAAAAATAAIAAAABAAAAAAAUAAIAAAAAAAAAAAAVAAIAAAACAAAAAAAAAAMAAAAGAAIAAAABAAMAAAACAAIAAAACAAMAAAACAAIAAAADAAMAAAACAAIAAAAEAAMAAAACAAIAAAAFAAMAAAACAAIAAAAGAAMAAAAFAAEAAAAHAAMAAAAAAAEAAAAIAAMAAAAAAAEAAAAJAAMAAAAEAAEAAAAKAAMAAAACAAAAAAAMAAMAAAAEAAAAAAANAAMAAAAGAAAAAAAOAAMAAAAHAAAAAAAPAAMAAAADAAAAAAAQAAMAAAACAAAAAAARAAMAAAABAAAAAAASAAMAAAAAAAAAAAATAAMAAAACAAAAAAAUAAMAAAABAAAAAAAVAAMAAAAAAAAAAAAAAAQAAAABAAIAAAABAAQAAAAFAAAAAAACAAQAAAAGAAAAAAADAAQAAAAHAAAAAAAEAAQAAAAFAAAAAAAFAAQAAAAGAAAAAAAGAAQAAAAHAAAAAAAHAAQAAAADAAIAAAAIAAQAAAACAAAAAAAKAAQAAAAAAAAAAAAMAAQAAAADAAAAAAANAAQAAAAFAAAAAAAOAAQAAAAGAAAAAAAPAAQAAAAEAAAAAAAQAAQAAAAAAAAAAAARAAQAAAACAAAAAAASAAQAAAABAAAAAAATAAQAAAAAAAAAAAAUAAQAAAACAAAAAAAVAAQAAAABAAAAAAAAAAUAAAABAAIAAAABAAUAAAAHAAAAAAACAAUAAAAFAAAAAAADAAUAAAAGAAAAAAAEAAUAAAAHAAAAAAAFAAUAAAAFAAAAAAAGAAUAAAAGAAAAAAAHAAUAAAADAAIAAAAIAAUAAAAAAAAAAAAJAAUAAAACAAAAAAAKAAUAAAABAAAAAAALAAUAAAAAAAAAAAAMAAUAAAAEAAAAAAANAAUAAAAHAAAAAAAOAAUAAAAFAAAAAAAPAAUAAAADAAAAAAAQAAUAAAABAAAAAAARAAUAAAAAAAAAAAASAAUAAAACAAAAAAATAAUAAAABAAAAAAAUAAUAAAAAAAAAAAAVAAUAAAACAAAAAAAAAAYAAAAFAAIAAAABAAYAAAAAAAIAAAACAAYAAAAAAAIAAAADAAYAAAAAAAIAAAAEAAYAAAAAAAIAAAAFAAYAAAAAAAIAAAAGAAYAAAAAAAIAAAAHAAYAAAAEAAIAAAAIAAYAAAABAAAAAAAJAAYAAAAAAAAAAAAKAAYAAAACAAAAAAALAAYAAAABAAAAAAAMAAYAAAADAAAAAAANAAYAAAAGAAAAAAAOAAYAAAAHAAAAAAAPAAYAAAAEAAAAAAAQAAYAAAACAAAAAAARAAYAAAABAAAAAAASAAYAAAAAAAAAAAATAAYAAAACAAAAAAAUAAYAAAABAAAAAAAVAAYAAAAAAAAAAAAAAAcAAAAEAAAAAAABAAcAAAADAAAAAAACAAcAAAAEAAAAAAADAAcAAAADAAAAAAAEAAcAAAAEAAAAAAAFAAcAAAADAAAAAAAGAAcAAAAEAAAAAAAHAAcAAAADAAAAAAAIAAcAAAAEAAAAAAAJAAcAAAADAAAAAAAKAAcAAAAEAAAAAAALAAcAAAADAAAAAAAMAAcAAAAHAAAAAAANAAcAAAAFAAAAAAAOAAcAAAAGAAAAAAAPAAcAAAAHAAAAAAAQAAcAAAAEAAAAAAARAAcAAAADAAAAAAASAAcAAAAEAAAAAAATAAcAAAADAAAAAAAUAAcAAAAEAAAAAAAVAAcAAAADAAAAAAAAAAgAAAAGAAAAAAABAAgAAAAHAAAAAAACAAgAAAAFAAAAAAADAAgAAAAGAAAAAAAEAAgAAAAHAAAAAAAFAAgAAAAFAAAAAAAGAAgAAAAGAAAAAAAHAAgAAAAHAAAAAAAIAAgAAAAFAAAAAAAJAAgAAAAGAAAAAAAKAAgAAAAHAAAAAAALAAgAAAAFAAAAAAAMAAgAAAAGAAAAAAANAAgAAAAHAAAAAAAOAAgAAAAFAAAAAAAPAAgAAAAGAAAAAAAQAAgAAAAHAAAAAAARAAgAAAAFAAAAAAASAAgAAAAGAAAAAAATAAgAAAAHAAAAAAAUAAgAAAAFAAAAAAAVAAgAAAAGAAAAAAAAAAkAAAAFAAAAAAABAAkAAAAGAAAAAAACAAkAAAAHAAAAAAADAAkAAAAFAAAAAAAEAAkAAAAGAAAAAAAFAAkAAAAHAAAAAAAGAAkAAAAFAAAAAAAHAAkAAAAGAAAAAAAIAAkAAAAHAAAAAAAJAAkAAAAFAAAAAAAKAAkAAAAGAAAAAAALAAkAAAAHAAAAAAAMAAkAAAAFAAAAAAANAAkAAAAGAAAAAAAOAAkAAAAHAAAAAAAPAAkAAAAFAAAAAAAQAAkAAAAGAAAAAAARAAkAAAAHAAAAAAASAAkAAAAFAAAAAAATAAkAAAAGAAAAAAAUAAkAAAAHAAAAAAAVAAkAAAAFAAAAAAAAAAoAAAADAAAAAAABAAoAAAAEAAAAAAACAAoAAAADAAAAAAADAAoAAAAEAAAAAAAEAAoAAAADAAAAAAAFAAoAAAAEAAAAAAAGAAoAAAADAAAAAAAHAAoAAAAEAAAAAAAIAAoAAAADAAAAAAAJAAoAAAAEAAAAAAAKAAoAAAADAAAAAAALAAoAAAAEAAAAAAANAAoAAAAFAAAAAAAOAAoAAAAGAAAAAAAPAAoAAAAHAAAAAAAQAAoAAAADAAAAAAARAAoAAAAEAAAAAAASAAoAAAADAAAAAAATAAoAAAAEAAAAAAAUAAoAAAADAAAAAAAVAAoAAAAEAAAAAAAAAAsAAAACAAAAAAABAAsAAAABAAAAAAACAAsAAAAAAAAAAAADAAsAAAACAAAAAAAEAAsAAAABAAAAAAAFAAsAAAAAAAAAAAAGAAsAAAACAAAAAAAHAAsAAAABAAAAAAAIAAsAAAAAAAAAAAAJAAsAAAACAAAAAAAKAAsAAAABAAAAAAALAAsAAAAAAAAAAAAMAAsAAAAEAAAAAAAPAAsAAAADAAAAAAAQAAsAAAABAAAAAAARAAsAAAAAAAAAAAASAAsAAAACAAAAAAATAAsAAAABAAAAAAAUAAsAAAAAAAAAAAAVAAsAAAACAAAAAAAAAAwAAAAAAAAAAAABAAwAAAACAAAAAAACAAwAAAABAAAAAAADAAwAAAAAAAAAAAAEAAwAAAACAAAAAAAFAAwAAAABAAAAAAAGAAwAAAAAAAAAAAAHAAwAAAACAAAAAAAIAAwAAAABAAAAAAAJAAwAAAAAAAAAAAAKAAwAAAACAAAAAAALAAwAAAABAAAAAAAMAAwAAAADAAAAAAAOAAwAAAAHAAAAAAAPAAwAAAAEAAAAAAAQAAwAAAACAAAAAAARAAwAAAABAAAAAAASAAwAAAAAAAAAAAATAAwAAAACAAAAAAAUAAwAAAABAAAAAAAVAAwAAAAAAAAAAAANAAwAAAAGAAAAAAANAAsAAAAHAAAAAAAOAAsAAAAFAAAAAAABAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAJAAQAAAABAAAAAAA=")
+tile_set = ExtResource("2_6a477")
+metadata/_edit_group_ = true
+
+[node name="GranicaGora" type="StaticBody2D" parent="." unique_id=2050566425]
+
+[node name="@CollisionShape2D@2" type="CollisionShape2D" parent="GranicaGora" unique_id=1080695031]
+position = Vector2(1401, -71.5)
+shape = SubResource("RectangleShape2D_1ra3e")
+
+[node name="GranicaDol" type="StaticBody2D" parent="." unique_id=716539835]
+
+[node name="@CollisionShape2D@3" type="CollisionShape2D" parent="GranicaDol" unique_id=1884431109]
+position = Vector2(1400, 1607.5)
+shape = SubResource("RectangleShape2D_hbiaa")
+
+[node name="GranicaLewa" type="StaticBody2D" parent="." unique_id=1802216776]
+
+[node name="_CollisionShape2D_4" type="CollisionShape2D" parent="GranicaLewa" unique_id=936645324]
+position = Vector2(-7.5, 800)
+shape = SubResource("RectangleShape2D_qwkcd")
+
+[node name="GranicaPrawa" type="StaticBody2D" parent="." unique_id=83724609]
+
+[node name="@CollisionShape2D@5" type="CollisionShape2D" parent="GranicaPrawa" unique_id=1300629512]
+position = Vector2(2807.5, 800)
+shape = SubResource("RectangleShape2D_3v1tn")
+
+[node name="Sklep" type="StaticBody2D" parent="." unique_id=2068981752]
+
+[node name="@CollisionShape2D@6" type="CollisionShape2D" parent="Sklep" unique_id=1843229743]
+position = Vector2(2450, 245)
+shape = SubResource("RectangleShape2D_a1fuh")
+
+[node name="KolizjaKiosku" type="StaticBody2D" parent="." unique_id=1441887459]
+
+[node name="@CollisionShape2D@7" type="CollisionShape2D" parent="KolizjaKiosku" unique_id=804515309]
+position = Vector2(1040, 363.5)
+shape = SubResource("RectangleShape2D_wl71g")
+
+[node name="Kosze" type="StaticBody2D" parent="." unique_id=96158933]
+
+[node name="@CollisionShape2D@8" type="CollisionShape2D" parent="Kosze" unique_id=1020075654]
+position = Vector2(282.5, 533)
+shape = SubResource("RectangleShape2D_qeq5b")
+
+[node name="KonteneryZaUlica" type="StaticBody2D" parent="." unique_id=1212467313]
+
+[node name="@CollisionShape2D@9" type="CollisionShape2D" parent="KonteneryZaUlica" unique_id=843308985]
+position = Vector2(2020, 585)
+shape = SubResource("RectangleShape2D_yj2db")
+
+[node name="KonteneryPrzyGarazach" type="StaticBody2D" parent="." unique_id=1645907016]
+
+[node name="@CollisionShape2D@10" type="CollisionShape2D" parent="KonteneryPrzyGarazach" unique_id=174939913]
+position = Vector2(2380, 1160)
+shape = SubResource("RectangleShape2D_c8vak")
+
+[node name="KonteneryNaPustymPlacu" type="StaticBody2D" parent="." unique_id=140954142]
+
+[node name="@CollisionShape2D@11" type="CollisionShape2D" parent="KonteneryNaPustymPlacu" unique_id=544478286]
+position = Vector2(1540, 1370)
+shape = SubResource("RectangleShape2D_ojuhd")
+
+[node name="Lawka" type="StaticBody2D" parent="." unique_id=1563613722]
+
+[node name="@CollisionShape2D@12" type="CollisionShape2D" parent="Lawka" unique_id=610674054]
+position = Vector2(1369, 350)
+shape = SubResource("RectangleShape2D_o77pg")
+
+[node name="StarySamochod" type="StaticBody2D" parent="." unique_id=1827973262]
+
+[node name="@CollisionShape2D@13" type="CollisionShape2D" parent="StarySamochod" unique_id=1641215750]
+position = Vector2(1140, 752.5)
+shape = SubResource("RectangleShape2D_t82kb")
+
+[node name="ZukMirka" type="StaticBody2D" parent="." unique_id=438755366]
+
+[node name="@CollisionShape2D@14" type="CollisionShape2D" parent="ZukMirka" unique_id=1844542162]
+position = Vector2(1460, 482.5)
+shape = SubResource("RectangleShape2D_h33lm")
+
+[node name="SkrzynkiMirkaLewe" type="StaticBody2D" parent="." unique_id=1275519377]
+
+[node name="@CollisionShape2D@15" type="CollisionShape2D" parent="SkrzynkiMirkaLewe" unique_id=1456775707]
+position = Vector2(1364, 637.5)
+shape = SubResource("RectangleShape2D_8fygl")
+
+[node name="SkrzynkiMirkaPrawe" type="StaticBody2D" parent="." unique_id=620356563]
+
+[node name="@CollisionShape2D@16" type="CollisionShape2D" parent="SkrzynkiMirkaPrawe" unique_id=1715691585]
+position = Vector2(1556, 637.5)
+shape = SubResource("RectangleShape2D_0bjbu")
+
+[node name="MagazynWschodni" type="StaticBody2D" parent="." unique_id=1453311321]
+
+[node name="@CollisionShape2D@17" type="CollisionShape2D" parent="MagazynWschodni" unique_id=1739656957]
+position = Vector2(2515, 857.5)
+shape = SubResource("RectangleShape2D_mqlt1")
+
+[node name="GarazeDolne" type="StaticBody2D" parent="." unique_id=1852235103]
+
+[node name="@CollisionShape2D@18" type="CollisionShape2D" parent="GarazeDolne" unique_id=476266067]
+position = Vector2(885, 1345)
+shape = SubResource("RectangleShape2D_vsl5p")
+
+[node name="PlotLewyA" type="StaticBody2D" parent="." unique_id=800777153]
+
+[node name="@CollisionShape2D@19" type="CollisionShape2D" parent="PlotLewyA" unique_id=1545200620]
+position = Vector2(259, 869)
+shape = SubResource("RectangleShape2D_c5up0")
+
+[node name="PlotLewyB" type="StaticBody2D" parent="." unique_id=736329437]
+
+[node name="@CollisionShape2D@20" type="CollisionShape2D" parent="PlotLewyB" unique_id=19588531]
+position = Vector2(606, 869)
+shape = SubResource("RectangleShape2D_oj5pu")
+
+[node name="PlotPrawy" type="StaticBody2D" parent="." unique_id=1292050173]
+
+[node name="@CollisionShape2D@21" type="CollisionShape2D" parent="PlotPrawy" unique_id=136367774]
+position = Vector2(1009, 860)
+shape = SubResource("RectangleShape2D_4gnoo")
+
+[node name="Slup" type="StaticBody2D" parent="." unique_id=1639690120]
+
+[node name="@CollisionShape2D@22" type="CollisionShape2D" parent="Slup" unique_id=2140481666]
+position = Vector2(1597, 212)
+shape = SubResource("CircleShape2D_ksv32")
+
+[node name="Drzewo1" type="StaticBody2D" parent="." unique_id=136064923]
+
+[node name="@CollisionShape2D@23" type="CollisionShape2D" parent="Drzewo1" unique_id=651114748]
+position = Vector2(865, 165)
+shape = SubResource("CircleShape2D_7xmex")
+
+[node name="Drzewo2" type="StaticBody2D" parent="." unique_id=402742282]
+
+[node name="@CollisionShape2D@24" type="CollisionShape2D" parent="Drzewo2" unique_id=1914762280]
+position = Vector2(1750, 760)
+shape = SubResource("CircleShape2D_62d7k")
+
+[node name="Drzewo3" type="StaticBody2D" parent="." unique_id=501505772]
+
+[node name="@CollisionShape2D@25" type="CollisionShape2D" parent="Drzewo3" unique_id=149444095]
+position = Vector2(2090, 830)
+shape = SubResource("CircleShape2D_ef0lx")
+
+[node name="Drzewo4" type="StaticBody2D" parent="." unique_id=572282331]
+
+[node name="@CollisionShape2D@26" type="CollisionShape2D" parent="Drzewo4" unique_id=830280007]
+position = Vector2(2700, 1050)
+shape = SubResource("CircleShape2D_y360i")
+
+[node name="DrzewoParkowe" type="StaticBody2D" parent="." unique_id=1860187039]
+
+[node name="@CollisionShape2D@27" type="CollisionShape2D" parent="DrzewoParkowe" unique_id=632796333]
+position = Vector2(72, 965)
+shape = SubResource("CircleShape2D_074pg")
+
+[node name="@StaticBody2D@29" type="StaticBody2D" parent="." unique_id=2035315316]
+
+[node name="@CollisionShape2D@28" type="CollisionShape2D" parent="@StaticBody2D@29" unique_id=1368030072]
+position = Vector2(250, 960)
+shape = SubResource("CircleShape2D_5d3s6")
+
+[node name="@StaticBody2D@31" type="StaticBody2D" parent="." unique_id=1560830239]
+
+[node name="@CollisionShape2D@30" type="CollisionShape2D" parent="@StaticBody2D@31" unique_id=793164576]
+position = Vector2(575, 970)
+shape = SubResource("CircleShape2D_kkqtg")
+
+[node name="@StaticBody2D@33" type="StaticBody2D" parent="." unique_id=397631709]
+
+[node name="@CollisionShape2D@32" type="CollisionShape2D" parent="@StaticBody2D@33" unique_id=1439199207]
+position = Vector2(82, 1160)
+shape = SubResource("CircleShape2D_ijmin")
+
+[node name="@StaticBody2D@35" type="StaticBody2D" parent="." unique_id=622966063]
+
+[node name="@CollisionShape2D@34" type="CollisionShape2D" parent="@StaticBody2D@35" unique_id=622412983]
+position = Vector2(565, 1260)
+shape = SubResource("CircleShape2D_hglhk")
+
+[node name="@StaticBody2D@37" type="StaticBody2D" parent="." unique_id=610139901]
+
+[node name="@CollisionShape2D@36" type="CollisionShape2D" parent="@StaticBody2D@37" unique_id=1039661881]
+position = Vector2(72, 1510)
+shape = SubResource("CircleShape2D_c12k4")
+
+[node name="@StaticBody2D@39" type="StaticBody2D" parent="." unique_id=1083031780]
+
+[node name="@CollisionShape2D@38" type="CollisionShape2D" parent="@StaticBody2D@39" unique_id=661663743]
+position = Vector2(430, 1530)
+shape = SubResource("CircleShape2D_vaewu")
+
+[node name="LawkaParkowaA" type="StaticBody2D" parent="." unique_id=1843720869]
+
+[node name="@CollisionShape2D@40" type="CollisionShape2D" parent="LawkaParkowaA" unique_id=902875878]
+position = Vector2(152, 1233)
+shape = SubResource("RectangleShape2D_hswgs")
+
+[node name="LawkaParkowaB" type="StaticBody2D" parent="." unique_id=2018100212]
+
+[node name="@CollisionShape2D@41" type="CollisionShape2D" parent="LawkaParkowaB" unique_id=1467883484]
+position = Vector2(485, 1450)
+shape = SubResource("RectangleShape2D_jmy5t")
+
+[node name="ZukGnojarz" type="Sprite2D" parent="." unique_id=767637858]
+z_index = 3
+texture_filter = 4
+position = Vector2(2450, 245)
+scale = Vector2(0.4, 0.4)
+texture = ExtResource("3_1xmgx")
+
+[node name="Kiosk" type="Sprite2D" parent="." unique_id=1438545492]
+z_index = 3
+texture_filter = 4
+position = Vector2(1040, 350)
+scale = Vector2(0.25, 0.25)
+texture = ExtResource("4_jc8yp")
+
+[node name="ZukMirkaSprite" type="Sprite2D" parent="." unique_id=476123270]
+z_index = 4
+texture_filter = 4
+position = Vector2(1460, 415.99997)
+scale = Vector2(0.19, 0.19)
+texture = ExtResource("5_c7uu0")
+
+[node name="SkrzynkaPuszekMirkaA" type="Sprite2D" parent="." unique_id=1469079783]
+z_index = 7
+texture_filter = 4
+position = Vector2(1364, 585)
+scale = Vector2(0.115, 0.115)
+texture = ExtResource("6_fsuak")
+
+[node name="SkrzynkaPuszekMirkaB" type="Sprite2D" parent="." unique_id=217346670]
+z_index = 7
+texture_filter = 4
+position = Vector2(1364, 686)
+scale = Vector2(0.115, 0.115)
+texture = ExtResource("6_fsuak")
+
+[node name="SkrzynkaZlomuMirkaA" type="Sprite2D" parent="." unique_id=779610169]
+z_index = 7
+texture_filter = 4
+position = Vector2(1556, 585)
+scale = Vector2(0.108, 0.108)
+texture = ExtResource("7_xdla5")
+
+[node name="SkrzynkaZlomuMirkaB" type="Sprite2D" parent="." unique_id=1183971222]
+z_index = 7
+texture_filter = 4
+position = Vector2(1556, 686)
+scale = Vector2(0.108, 0.108)
+texture = ExtResource("7_xdla5")
+
+[node name="PlotZwykly" type="Sprite2D" parent="." unique_id=1458576542]
+z_index = 4
+texture_filter = 4
+position = Vector2(146, 809)
+scale = Vector2(0.18, 0.18)
+texture = SubResource("AtlasTexture_ktbr8")
+
+[node name="@Sprite2D@42" type="Sprite2D" parent="." unique_id=762346652]
+z_index = 4
+texture_filter = 4
+position = Vector2(258, 809)
+scale = Vector2(0.18, 0.18)
+texture = SubResource("AtlasTexture_hrwdy")
+
+[node name="@Sprite2D@43" type="Sprite2D" parent="." unique_id=1895711036]
+z_index = 4
+texture_filter = 4
+position = Vector2(370, 809)
+scale = Vector2(0.18, 0.18)
+texture = SubResource("AtlasTexture_6f8wg")
+
+[node name="@Sprite2D@44" type="Sprite2D" parent="." unique_id=1265374733]
+z_index = 4
+texture_filter = 4
+position = Vector2(606, 809)
+scale = Vector2(0.18, 0.18)
+texture = SubResource("AtlasTexture_3d1ul")
+
+[node name="@Sprite2D@45" type="Sprite2D" parent="." unique_id=259319695]
+z_index = 4
+texture_filter = 4
+position = Vector2(845, 809)
+scale = Vector2(0.18, 0.18)
+texture = SubResource("AtlasTexture_onckp")
+
+[node name="@Sprite2D@46" type="Sprite2D" parent="." unique_id=1291311013]
+z_index = 4
+texture_filter = 4
+position = Vector2(955, 809)
+scale = Vector2(0.18, 0.18)
+texture = SubResource("AtlasTexture_aulxf")
+
+[node name="@Sprite2D@47" type="Sprite2D" parent="." unique_id=296703968]
+z_index = 4
+texture_filter = 4
+position = Vector2(1065, 809)
+scale = Vector2(0.18, 0.18)
+texture = SubResource("AtlasTexture_x5om6")
+
+[node name="@Sprite2D@48" type="Sprite2D" parent="." unique_id=1158180458]
+z_index = 4
+texture_filter = 4
+position = Vector2(1175, 809)
+scale = Vector2(0.18, 0.18)
+texture = SubResource("AtlasTexture_d03j4")
+
+[node name="PunktyRozgrywki" type="Node2D" parent="." unique_id=226597152]
+editor_description = "Przesuwaj te markery w widoku 2D. Gra odczytuje ich pozycje podczas uruchamiania."
+
+[node name="Start" type="Node2D" parent="PunktyRozgrywki" unique_id=1330023926]
+
+[node name="Bohater" type="Marker2D" parent="PunktyRozgrywki/Start" unique_id=2123056649]
+editor_description = "Pozycja startowa bohatera"
+position = Vector2(850, 600)
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/Start/Bohater" unique_id=1078126031]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Pozycja startowa bohatera"
+
+[node name="Interakcje" type="Node2D" parent="PunktyRozgrywki" unique_id=947153866]
+
+[node name="ReklamowkaStartowa" type="Marker2D" parent="PunktyRozgrywki/Interakcje" unique_id=469996565]
+editor_description = "Startowa reklamówka"
+position = Vector2(954, 530)
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/Interakcje/ReklamowkaStartowa" unique_id=264117825]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Startowa reklamówka"
+
+[node name="AutomatNaPuszki" type="Marker2D" parent="PunktyRozgrywki/Interakcje" unique_id=275478967]
+editor_description = "Automat na puszki"
+position = Vector2(858, 320)
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/Interakcje/AutomatNaPuszki" unique_id=1734416675]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Automat na puszki"
+
+[node name="WejscieDoSklepu" type="Marker2D" parent="PunktyRozgrywki/Interakcje" unique_id=1032712751]
+editor_description = "Drzwi Żuka Gnojarza"
+position = Vector2(2450, 450)
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/Interakcje/WejscieDoSklepu" unique_id=1864120724]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Drzwi Żuka Gnojarza"
+
+[node name="OkienkoKiosku" type="Marker2D" parent="PunktyRozgrywki/Interakcje" unique_id=1666441782]
+editor_description = "Okienko kiosku"
+position = Vector2(1040, 520)
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/Interakcje/OkienkoKiosku" unique_id=937754645]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Okienko kiosku"
+
+[node name="ZadymiarzPodKioskiem" type="Marker2D" parent="PunktyRozgrywki/Interakcje" unique_id=1902586371]
+editor_description = "Przeciwnik walki turowej"
+position = Vector2(1160, 580)
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/Interakcje/ZadymiarzPodKioskiem" unique_id=1723361572]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Przeciwnik walki turowej"
+
+[node name="Mirek" type="Marker2D" parent="PunktyRozgrywki/Interakcje" unique_id=835005920]
+editor_description = "Mirek"
+position = Vector2(1460, 610)
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/Interakcje/Mirek" unique_id=1400968998]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Mirek"
+
+[node name="Heniek" type="Marker2D" parent="PunktyRozgrywki/Interakcje" unique_id=1505810093]
+editor_description = "Heniek Mechanik"
+position = Vector2(1210, 1335)
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/Interakcje/Heniek" unique_id=1931662261]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Heniek Mechanik"
+
+[node name="SiatkaDoWyciecia" type="Marker2D" parent="PunktyRozgrywki/Interakcje" unique_id=1654614933]
+editor_description = "Fragment płotu do wycięcia"
+position = Vector2(490, 855)
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/Interakcje/SiatkaDoWyciecia" unique_id=849335649]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Fragment płotu do wycięcia"
+
+[node name="StanyNPC" type="Node2D" parent="PunktyRozgrywki" unique_id=2025183578]
+
+[node name="BurekStart" type="Marker2D" parent="PunktyRozgrywki/StanyNPC" unique_id=1241122640]
+editor_description = "Burek blokujący drzwi"
+position = Vector2(2450, 470)
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/StanyNPC/BurekStart" unique_id=280202269]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Burek blokujący drzwi"
+
+[node name="BurekPoWalce" type="Marker2D" parent="PunktyRozgrywki/StanyNPC" unique_id=1778416746]
+editor_description = "Burek po przegranej"
+position = Vector2(2310, 520)
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/StanyNPC/BurekPoWalce" unique_id=2077182726]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Burek po przegranej"
+
+[node name="ZulCzeka" type="Marker2D" parent="PunktyRozgrywki/StanyNPC" unique_id=1472820293]
+editor_description = "Żul przed aktywacją blokady"
+position = Vector2(1660, 690)
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/StanyNPC/ZulCzeka" unique_id=113446012]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Żul przed aktywacją blokady"
+
+[node name="ZulBlokuje" type="Marker2D" parent="PunktyRozgrywki/StanyNPC" unique_id=1536868023]
+editor_description = "Żul blokujący przejście"
+position = Vector2(1460, 750)
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/StanyNPC/ZulBlokuje" unique_id=870625975]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Żul blokujący przejście"
+
+[node name="ZulPoWalce" type="Marker2D" parent="PunktyRozgrywki/StanyNPC" unique_id=1917938843]
+editor_description = "Żul po przegranej"
+position = Vector2(1660, 760)
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/StanyNPC/ZulPoWalce" unique_id=1765708471]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Żul po przegranej"
+
+[node name="Kontenery" type="Node2D" parent="PunktyRozgrywki" unique_id=995924804]
+
+[node name="KonteneryStartowe" type="Marker2D" parent="PunktyRozgrywki/Kontenery" unique_id=1554624140]
+editor_description = "Kontenery startowe"
+position = Vector2(300, 535)
+metadata/guaranteed_wire = false
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/Kontenery/KonteneryStartowe" unique_id=1042107422]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Kontenery startowe"
+
+[node name="KonteneryZaUlica" type="Marker2D" parent="PunktyRozgrywki/Kontenery" unique_id=1702330889]
+editor_description = "Kontenery za ulicą"
+position = Vector2(2020, 585)
+metadata/guaranteed_wire = true
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/Kontenery/KonteneryZaUlica" unique_id=99629837]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Kontenery za ulicą"
+
+[node name="KonteneryPrzyGarazach" type="Marker2D" parent="PunktyRozgrywki/Kontenery" unique_id=1218142058]
+editor_description = "Kontenery przy garażach"
+position = Vector2(2380, 1160)
+metadata/guaranteed_wire = true
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/Kontenery/KonteneryPrzyGarazach" unique_id=1302147269]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Kontenery przy garażach"
+
+[node name="KonteneryNaPustymPlacu" type="Marker2D" parent="PunktyRozgrywki/Kontenery" unique_id=614684995]
+editor_description = "Kontenery na pustym placu"
+position = Vector2(1540, 1370)
+metadata/guaranteed_wire = true
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/Kontenery/KonteneryNaPustymPlacu" unique_id=999858626]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Kontenery na pustym placu"
+
+[node name="Szczory" type="Node2D" parent="PunktyRozgrywki"]
+
+[node name="SzczorSamotny" type="Marker2D" parent="PunktyRozgrywki/Szczory"]
+editor_description = "Samotny Szczór — prosty przeciwnik przy dolnych garażach"
+position = Vector2(590, 1190)
+metadata/rat_group = 1
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/Szczory/SzczorSamotny"]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Szczór — samotny"
+
+[node name="PodgladSzczora" type="Sprite2D" parent="PunktyRozgrywki/Szczory/SzczorSamotny"]
+texture_filter = 4
+scale = Vector2(0.29, 0.29)
+texture = SubResource("AtlasTexture_rat_idle")
+offset = Vector2(0, -138)
+
+[node name="SzczorPara1" type="Marker2D" parent="PunktyRozgrywki/Szczory"]
+editor_description = "Szczór — para przy dolnych garażach"
+position = Vector2(1165, 1200)
+metadata/rat_group = 2
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/Szczory/SzczorPara1"]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Szczór — para"
+
+[node name="PodgladSzczora" type="Sprite2D" parent="PunktyRozgrywki/Szczory/SzczorPara1"]
+texture_filter = 4
+scale = Vector2(0.29, 0.29)
+texture = SubResource("AtlasTexture_rat_idle")
+offset = Vector2(0, -138)
+
+[node name="SzczorPara2" type="Marker2D" parent="PunktyRozgrywki/Szczory"]
+editor_description = "Szczór — para przy dolnych garażach"
+position = Vector2(1215, 1470)
+metadata/rat_group = 2
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/Szczory/SzczorPara2"]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Szczór — para"
+
+[node name="PodgladSzczora" type="Sprite2D" parent="PunktyRozgrywki/Szczory/SzczorPara2"]
+texture_filter = 4
+scale = Vector2(0.29, 0.29)
+texture = SubResource("AtlasTexture_rat_idle")
+offset = Vector2(0, -138)
+
+[node name="WatahyPsow" type="Node2D" parent="PunktyRozgrywki" unique_id=1555751363]
+
+[node name="Wataha1" type="Node2D" parent="PunktyRozgrywki/WatahyPsow" unique_id=1938201282]
+
+[node name="Pies1" type="Marker2D" parent="PunktyRozgrywki/WatahyPsow/Wataha1" unique_id=225505479]
+editor_description = "Dziki pies — wataha 1"
+position = Vector2(470, 1020)
+metadata/pack_id = 1
+metadata/dog_index = 1
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/WatahyPsow/Wataha1/Pies1" unique_id=2002362215]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Dziki pies — wataha 1"
+
+[node name="PodgladPsa" type="Sprite2D" parent="PunktyRozgrywki/WatahyPsow/Wataha1/Pies1" unique_id=1476229373]
+texture_filter = 4
+scale = Vector2(0.29, 0.29)
+texture = SubResource("AtlasTexture_i2chw")
+offset = Vector2(26, -138)
+
+[node name="Pies2" type="Marker2D" parent="PunktyRozgrywki/WatahyPsow/Wataha1" unique_id=1768007848]
+editor_description = "Dziki pies — wataha 1"
+position = Vector2(550, 1080)
+metadata/pack_id = 1
+metadata/dog_index = 2
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/WatahyPsow/Wataha1/Pies2" unique_id=1492495513]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Dziki pies — wataha 1"
+
+[node name="PodgladPsa" type="Sprite2D" parent="PunktyRozgrywki/WatahyPsow/Wataha1/Pies2" unique_id=1018515734]
+texture_filter = 4
+scale = Vector2(0.29, 0.29)
+texture = SubResource("AtlasTexture_gfrpi")
+offset = Vector2(26, -138)
+
+[node name="Wataha2" type="Node2D" parent="PunktyRozgrywki/WatahyPsow" unique_id=243333360]
+
+[node name="Pies1" type="Marker2D" parent="PunktyRozgrywki/WatahyPsow/Wataha2" unique_id=1277333840]
+editor_description = "Dziki pies — wataha 2"
+position = Vector2(315, 1190)
+metadata/pack_id = 2
+metadata/dog_index = 1
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/WatahyPsow/Wataha2/Pies1" unique_id=686024389]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Dziki pies — wataha 2"
+
+[node name="PodgladPsa" type="Sprite2D" parent="PunktyRozgrywki/WatahyPsow/Wataha2/Pies1" unique_id=2011309063]
+texture_filter = 4
+scale = Vector2(0.29, 0.29)
+texture = SubResource("AtlasTexture_0kgxu")
+offset = Vector2(26, -138)
+
+[node name="Pies2" type="Marker2D" parent="PunktyRozgrywki/WatahyPsow/Wataha2" unique_id=308135341]
+editor_description = "Dziki pies — wataha 2"
+position = Vector2(400, 1230)
+metadata/pack_id = 2
+metadata/dog_index = 2
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/WatahyPsow/Wataha2/Pies2" unique_id=822364831]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Dziki pies — wataha 2"
+
+[node name="PodgladPsa" type="Sprite2D" parent="PunktyRozgrywki/WatahyPsow/Wataha2/Pies2" unique_id=1271981979]
+texture_filter = 4
+scale = Vector2(0.29, 0.29)
+texture = SubResource("AtlasTexture_m4233")
+offset = Vector2(26, -138)
+
+[node name="Pies3" type="Marker2D" parent="PunktyRozgrywki/WatahyPsow/Wataha2" unique_id=845271249]
+editor_description = "Dziki pies — wataha 2"
+position = Vector2(330, 1280)
+metadata/pack_id = 2
+metadata/dog_index = 3
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/WatahyPsow/Wataha2/Pies3" unique_id=612034985]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Dziki pies — wataha 2"
+
+[node name="PodgladPsa" type="Sprite2D" parent="PunktyRozgrywki/WatahyPsow/Wataha2/Pies3" unique_id=29304596]
+texture_filter = 4
+scale = Vector2(0.29, 0.29)
+texture = SubResource("AtlasTexture_qlplm")
+offset = Vector2(26, -138)
+
+[node name="Wataha3" type="Node2D" parent="PunktyRozgrywki/WatahyPsow" unique_id=37352715]
+
+[node name="Pies1" type="Marker2D" parent="PunktyRozgrywki/WatahyPsow/Wataha3" unique_id=1604466385]
+editor_description = "Dziki pies — wataha 3"
+position = Vector2(140, 1370)
+metadata/pack_id = 3
+metadata/dog_index = 1
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/WatahyPsow/Wataha3/Pies1" unique_id=149329870]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Dziki pies — wataha 3"
+
+[node name="PodgladPsa" type="Sprite2D" parent="PunktyRozgrywki/WatahyPsow/Wataha3/Pies1" unique_id=1427632801]
+texture_filter = 4
+scale = Vector2(0.29, 0.29)
+texture = SubResource("AtlasTexture_ws1lj")
+offset = Vector2(26, -138)
+
+[node name="Pies2" type="Marker2D" parent="PunktyRozgrywki/WatahyPsow/Wataha3" unique_id=1389459045]
+editor_description = "Dziki pies — wataha 3"
+position = Vector2(230, 1400)
+metadata/pack_id = 3
+metadata/dog_index = 2
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/WatahyPsow/Wataha3/Pies2" unique_id=1096514028]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Dziki pies — wataha 3"
+
+[node name="PodgladPsa" type="Sprite2D" parent="PunktyRozgrywki/WatahyPsow/Wataha3/Pies2" unique_id=492205235]
+texture_filter = 4
+scale = Vector2(0.29, 0.29)
+texture = SubResource("AtlasTexture_10135")
+offset = Vector2(26, -138)
+
+[node name="Pies3" type="Marker2D" parent="PunktyRozgrywki/WatahyPsow/Wataha3" unique_id=1343042891]
+editor_description = "Dziki pies — wataha 3"
+position = Vector2(175, 1470)
+metadata/pack_id = 3
+metadata/dog_index = 3
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/WatahyPsow/Wataha3/Pies3" unique_id=1835763120]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Dziki pies — wataha 3"
+
+[node name="PodgladPsa" type="Sprite2D" parent="PunktyRozgrywki/WatahyPsow/Wataha3/Pies3" unique_id=617561452]
+texture_filter = 4
+scale = Vector2(0.29, 0.29)
+texture = SubResource("AtlasTexture_8x0n6")
+offset = Vector2(26, -138)
+
+[node name="Pies4" type="Marker2D" parent="PunktyRozgrywki/WatahyPsow/Wataha3" unique_id=211813864]
+editor_description = "Dziki pies — wataha 3"
+position = Vector2(285, 1490)
+metadata/pack_id = 3
+metadata/dog_index = 4
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/WatahyPsow/Wataha3/Pies4" unique_id=1937115109]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 10.0
+offset_bottom = -22.0
+theme_override_colors/font_color = Color(1, 0.8862745, 0.6039216, 1)
+theme_override_colors/font_shadow_color = Color(0.06666667, 0.06666667, 0.06666667, 1)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 1
+theme_override_font_sizes/font_size = 11
+text = "Dziki pies — wataha 3"
+
+[node name="PodgladPsa" type="Sprite2D" parent="PunktyRozgrywki/WatahyPsow/Wataha3/Pies4" unique_id=1786474794]
+texture_filter = 4
+scale = Vector2(0.29, 0.29)
+texture = SubResource("AtlasTexture_6f7ja")
+offset = Vector2(26, -138)
+
+[node name="Puszki" type="Node2D" parent="PunktyRozgrywki" unique_id=578599820]
+
+[node name="Puszka01" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=1017559596]
+editor_description = "Puszka nr 1"
+position = Vector2(620, 560)
+metadata/spawn_index = 0
+metadata/rotation = -0.35
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka01" unique_id=805612593]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka02" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=515494515]
+editor_description = "Puszka nr 2"
+position = Vector2(770, 720)
+metadata/spawn_index = 1
+metadata/rotation = 0.0
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka02" unique_id=965152134]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka03" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=80902804]
+editor_description = "Puszka nr 3"
+position = Vector2(960, 670)
+metadata/spawn_index = 2
+metadata/rotation = 0.35
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka03" unique_id=1206028516]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka04" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=1620015845]
+editor_description = "Puszka nr 4"
+position = Vector2(1260, 610)
+metadata/spawn_index = 3
+metadata/rotation = -0.35
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka04" unique_id=5543545]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka05" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=931035198]
+editor_description = "Puszka nr 5"
+position = Vector2(1480, 800)
+metadata/spawn_index = 4
+metadata/rotation = 0.0
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka05" unique_id=707940242]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka06" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=1568154625]
+editor_description = "Puszka nr 6"
+position = Vector2(520, 785)
+metadata/spawn_index = 5
+metadata/rotation = 0.35
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka06" unique_id=249852173]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka07" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=94257121]
+editor_description = "Puszka nr 7"
+position = Vector2(1030, 610)
+metadata/spawn_index = 6
+metadata/rotation = -0.35
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka07" unique_id=2033635152]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka08" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=1820892272]
+editor_description = "Puszka nr 8"
+position = Vector2(1260, 870)
+metadata/spawn_index = 7
+metadata/rotation = 0.0
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka08" unique_id=886768136]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka09" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=236836040]
+editor_description = "Puszka nr 9"
+position = Vector2(1880, 280)
+metadata/spawn_index = 8
+metadata/rotation = 0.35
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka09" unique_id=1283594429]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka10" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=30764627]
+editor_description = "Puszka nr 10"
+position = Vector2(2010, 610)
+metadata/spawn_index = 9
+metadata/rotation = -0.35
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka10" unique_id=1991921497]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka11" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=629874683]
+editor_description = "Puszka nr 11"
+position = Vector2(2030, 720)
+metadata/spawn_index = 10
+metadata/rotation = 0.0
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka11" unique_id=248901922]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka12" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=546678971]
+editor_description = "Puszka nr 12"
+position = Vector2(2310, 710)
+metadata/spawn_index = 11
+metadata/rotation = 0.35
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka12" unique_id=14179943]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka13" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=287425856]
+editor_description = "Puszka nr 13"
+position = Vector2(2650, 600)
+metadata/spawn_index = 12
+metadata/rotation = -0.35
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka13" unique_id=231114058]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka14" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=1037756558]
+editor_description = "Puszka nr 14"
+position = Vector2(2680, 820)
+metadata/spawn_index = 13
+metadata/rotation = 0.0
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka14" unique_id=1573861272]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka15" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=393753159]
+editor_description = "Puszka nr 15"
+position = Vector2(2070, 980)
+metadata/spawn_index = 14
+metadata/rotation = 0.35
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka15" unique_id=1357137070]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka16" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=1767488167]
+editor_description = "Puszka nr 16"
+position = Vector2(2250, 1260)
+metadata/spawn_index = 15
+metadata/rotation = -0.35
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka16" unique_id=599316867]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka17" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=1017408673]
+editor_description = "Puszka nr 17"
+position = Vector2(2510, 1370)
+metadata/spawn_index = 16
+metadata/rotation = 0.0
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka17" unique_id=1328556146]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka18" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=1089575206]
+editor_description = "Puszka nr 18"
+position = Vector2(1790, 1240)
+metadata/spawn_index = 17
+metadata/rotation = 0.35
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka18" unique_id=555868424]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka19" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=2001508306]
+editor_description = "Puszka nr 19"
+position = Vector2(1450, 1460)
+metadata/spawn_index = 18
+metadata/rotation = -0.35
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka19" unique_id=928569659]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka20" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=81275953]
+editor_description = "Puszka nr 20"
+position = Vector2(1090, 1320)
+metadata/spawn_index = 19
+metadata/rotation = 0.0
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka20" unique_id=1188731003]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka21" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=1974548147]
+editor_description = "Puszka nr 21"
+position = Vector2(720, 1210)
+metadata/spawn_index = 20
+metadata/rotation = 0.35
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka21" unique_id=320210806]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka22" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=1909899796]
+editor_description = "Puszka nr 22"
+position = Vector2(390, 1390)
+metadata/spawn_index = 21
+metadata/rotation = -0.35
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka22" unique_id=138173087]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka23" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=1319627690]
+editor_description = "Puszka nr 23"
+position = Vector2(2650, 1510)
+metadata/spawn_index = 22
+metadata/rotation = 0.0
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka23" unique_id=1739120709]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka24" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=413405125]
+editor_description = "Puszka nr 24"
+position = Vector2(1900, 1490)
+metadata/spawn_index = 23
+metadata/rotation = 0.35
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka24" unique_id=308374831]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka25" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=1174606235]
+editor_description = "Puszka nr 25"
+position = Vector2(430, 1070)
+metadata/spawn_index = 24
+metadata/rotation = -0.35
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka25" unique_id=409678898]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka26" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=1453477567]
+editor_description = "Puszka nr 26"
+position = Vector2(590, 1025)
+metadata/spawn_index = 25
+metadata/rotation = 0.0
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka26" unique_id=1387772728]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka27" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=1313292798]
+editor_description = "Puszka nr 27"
+position = Vector2(270, 1245)
+metadata/spawn_index = 26
+metadata/rotation = 0.35
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka27" unique_id=1837438388]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka28" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=715280694]
+editor_description = "Puszka nr 28"
+position = Vector2(450, 1180)
+metadata/spawn_index = 27
+metadata/rotation = -0.35
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka28" unique_id=408404987]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka29" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=109154316]
+editor_description = "Puszka nr 29"
+position = Vector2(115, 1430)
+metadata/spawn_index = 28
+metadata/rotation = 0.0
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka29" unique_id=249732737]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
+
+[node name="Puszka30" type="Marker2D" parent="PunktyRozgrywki/Puszki" unique_id=1219407118]
+editor_description = "Puszka nr 30"
+position = Vector2(335, 1435)
+metadata/spawn_index = 29
+metadata/rotation = 0.35
+
+[node name="PodgladPuszki" type="Sprite2D" parent="PunktyRozgrywki/Puszki/Puszka30" unique_id=1005610600]
+texture_filter = 4
+scale = Vector2(0.055, 0.055)
+texture = ExtResource("10_d8vbv")
