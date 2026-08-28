@@ -15,6 +15,8 @@ func _run() -> void:
 	_expect(terrain != null, "Scena zawiera widoczną warstwę TileMapLayer")
 	_expect(terrain != null and terrain.get_used_cells().size() > 200, "Kafelki podłoża są zapisane w scenie, a nie tworzone dopiero po starcie")
 	_expect(editable_map.get_node_or_null("ZukGnojarz") is Sprite2D, "Budynki są osobnymi węzłami Sprite2D")
+	_expect(_count_nodes_named(editable_map, "Kiosk") == 1, "Mapa zawiera dokładnie jeden kiosk")
+	_expect(_count_nodes_named(editable_map, "ZukGnojarz") == 1, "Mapa zawiera dokładnie jeden sklep Żuk Gnojarz")
 	_expect(editable_map.get_node_or_null("KolizjaKiosku") is StaticBody2D, "Kolizje są osobnymi węzłami edytora")
 	_expect(editable_map.get_node_or_null("PunktyRozgrywki/Puszki").get_child_count() == 30, "Trzydzieści puszek ma przesuwalne markery")
 	_expect(editable_map.get_node_or_null("PunktyRozgrywki/WatahyPsow/Wataha1").get_child_count() == 2, "Pierwsza wataha ma markery w scenie")
@@ -29,6 +31,8 @@ func _run() -> void:
 	await process_frame
 	var world := game.get_node_or_null("Osiedle") as WorldMap
 	_expect(world != null, "Main zawiera instancję edytowalnej mapy")
+	_expect(world.position == Vector2.ZERO, "Pełna mapa pokrywa się z granicami kamery i nie jest ucięta")
+	_expect(world.get_node_or_null("PunktyRozgrywki/Start/WejscieZPrzedmiescia") is Marker2D, "Mapa ma południowe wejście z przedmieścia")
 	var player_marker := world.get_node("PunktyRozgrywki/Start/Bohater") as Marker2D
 	_expect(game.player.global_position == player_marker.global_position, "Pozycja bohatera pochodzi z markera sceny")
 	var can_marker := world.get_node("PunktyRozgrywki/Puszki/Puszka01") as Marker2D
@@ -47,3 +51,9 @@ func _expect(condition: bool, description: String) -> void:
 	if not condition:
 		failures += 1
 		printerr("FAIL: " + description)
+
+func _count_nodes_named(root_node: Node, node_name: String) -> int:
+	var result := 1 if String(root_node.name) == node_name else 0
+	for child in root_node.get_children():
+		result += _count_nodes_named(child, node_name)
+	return result

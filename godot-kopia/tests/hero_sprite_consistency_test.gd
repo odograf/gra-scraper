@@ -12,7 +12,9 @@ func _run() -> void:
 
 	_expect(player.LOCOMOTION_SHEET.get_size() == Vector2(1287, 1220), "Arkusz chodu ma dokładną siatkę 3 na 4")
 	_expect(player.ACTION_SHEET.get_size() == Vector2(1024, 2048), "Arkusz czynności ma dokładną siatkę 4 na 8")
-	_expect(player.BAG_HAMMER_ATTACK_SHEET.get_size() == Vector2(2560, 960), "Arkusz ataku ma dokładną siatkę 4 na 2")
+	_expect(player.BAG_ATTACK_BODY_SHEET.get_size() == Vector2(2048, 768), "Arkusz ciała ataku ma dokładną siatkę 4 na 2")
+	_expect(player.BAG_ATTACK_BODY_FRAME_SIZE == Vector2i(512, 384), "Ciało zamachu jest niezależne od rozmiaru broni")
+	_expect(player.weapon_sprite != null and player.weapon_sprite.sprite_frames.get_frame_count("attack") == 8, "Osobna warstwa broni ma osiem klatek")
 	_expect(player.ACTION_FRAME_SIZE == Vector2i(256, 256), "Klatki czynności mają bezpieczny margines")
 
 	var action_image := player.ACTION_SHEET.get_image()

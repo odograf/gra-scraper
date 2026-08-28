@@ -532,6 +532,19 @@ theme_override_constants/shadow_offset_y = 1
 theme_override_font_sizes/font_size = 11
 text = "Pozycja startowa bohatera"
 
+[node name="WejscieZPrzedmiescia" type="Marker2D" parent="PunktyRozgrywki/Start"]
+editor_description = "Wejście na pełną mapę od południa po przejściu przez przedmieście"
+position = Vector2(1400, 1520)
+
+[node name="Opis" type="Label" parent="PunktyRozgrywki/Start/WejscieZPrzedmiescia"]
+offset_left = 10.0
+offset_top = -22.0
+offset_right = 220.0
+offset_bottom = 0.0
+theme_override_colors/font_color = Color(0.937, 0.718, 0.278, 1)
+theme_override_font_sizes/font_size = 11
+text = "WEJŚCIE Z PRZEDMIEŚCIA"
+
 [node name="Interakcje" type="Node2D" parent="PunktyRozgrywki" unique_id=947153866]
 
 [node name="ReklamowkaStartowa" type="Marker2D" parent="PunktyRozgrywki/Interakcje" unique_id=469996565]

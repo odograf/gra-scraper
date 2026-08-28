@@ -24,6 +24,7 @@ func _run() -> void:
 	root.add_child(menu)
 	await process_frame
 	_expect(menu.main_box != null and menu.load_box != null, "Menu główne ma wybór nowej gry i wczytywania")
+	_expect(menu.NEW_GAME_SCENE == "res://scenes/melina_prologue_mockup.tscn", "Nowa gra z menu zaczyna się w melinie")
 	menu.queue_free()
 	await process_frame
 
@@ -37,6 +38,7 @@ func _run() -> void:
 	game.nicotine_level = 42.0
 	game.player.global_position = Vector2(1234, 987)
 	game.inventory.add_item("dog_collar", 2)
+	game.inventory.equip_bag_weapon("black_sack")
 	game.player_state.set_health(73)
 	var snapshot: Dictionary = game._build_save_data()
 	_expect(save_manager.save_game(2, snapshot), "Zapis do wybranego slotu działa")
@@ -49,10 +51,13 @@ func _run() -> void:
 
 	game.cash = 0.0
 	game.inventory.items["dog_collar"] = 0
+	game.inventory.equip_bag_weapon("plastic_bag")
 	game.player_state.set_health(1)
 	game._restore_save_data(loaded)
 	_expect(is_equal_approx(game.cash, 37.25), "Gotówka wraca po wczytaniu")
 	_expect(game.inventory.item_count("dog_collar") == 2, "Ekwipunek wraca po wczytaniu")
+	_expect(game.inventory.equipped_bag_weapon == "black_sack", "Wybrana broń torbowa wraca po wczytaniu")
+	_expect(game.player.equipped_bag_weapon == &"black_sack", "Warstwa broni bohatera synchronizuje się z zapisem")
 	_expect(game.player_health == 73, "Zdrowie wraca po wczytaniu")
 	_expect(game.player.global_position == Vector2(1234, 987), "Pozycja bohatera wraca po wczytaniu")
 

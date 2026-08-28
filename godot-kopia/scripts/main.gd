@@ -10,6 +10,7 @@ const MirekNPCScript := preload("res://scripts/mirek_npc.gd")
 const ScrapFenceScript := preload("res://scripts/scrap_fence.gd")
 const TrashSearchScript := preload("res://scripts/trash_search.gd")
 const PlayerInventoryScript := preload("res://scripts/player_inventory.gd")
+const BagWeaponCatalogScript := preload("res://scripts/bag_weapon_catalog.gd")
 const StarterBagScript := preload("res://scripts/starter_bag.gd")
 const CombatPrototypeScript := preload("res://scripts/combat_prototype.gd")
 const CombatEnemyScript := preload("res://scripts/combat_enemy.gd")
@@ -23,6 +24,7 @@ const ItemCatalogScript := preload("res://scripts/item_catalog.gd")
 const LootPickupScript := preload("res://scripts/loot_pickup.gd")
 const PauseMenuScript := preload("res://scripts/pause_menu.gd")
 const SaveManagerScript := preload("res://scripts/save_manager.gd")
+const PrologueState := preload("res://scripts/prologue_mockup_state.gd")
 const LOADING_ART := preload("res://assets/loading/map_concept.png")
 const MIREK_PORTRAIT := preload("res://assets/npcs/mirek.png")
 const ZUL_1_MAP_TEXTURE := preload("res://assets/npcs/zul_1_idle_sheet_v2.png")
@@ -63,6 +65,9 @@ const BUREK_DEFEATED_POSITION := Vector2(2310, 520)
 const ZUL_WAIT_POSITION := Vector2(1660, 690)
 const ZUL_BLOCK_POSITION := Vector2(1460, 750)
 const ZUL_DEFEATED_POSITION := Vector2(1660, 760)
+# Dolny HUD przechwytuje kliknięcia. Kamera zostawia pod nim pusty pas,
+# dzięki czemu dolna krawędź świata i wyjścia pozostają widoczne oraz klikalne.
+const HUD_CAMERA_BOTTOM_CLEARANCE_PX := 82.0
 
 enum QuestState { NOT_STARTED, NEED_CANS, HAS_SHEARS, CUT_MESH, COMPLETED }
 enum HeniekQuestState { NOT_STARTED, FIND_HENIEK, NEED_WIRE, RETURN_KEY, COMPLETED }
@@ -181,16 +186,21 @@ func _ready() -> void:
 	add_child(realtime_enemy_director)
 	loot_rng.randomize()
 	inventory = PlayerInventoryScript.new()
-	inventory.changed.connect(_update_ui)
+	inventory.changed.connect(_on_inventory_changed)
 	_create_world()
 	_create_player()
 	_create_world_interactions()
 	_create_pickups()
 	_create_ui()
 	var loaded_data: Dictionary = _save_manager().consume_pending_load()
+	var entered_from_suburb := false
 	if not loaded_data.is_empty():
 		_restore_save_data(loaded_data)
-	_show_loading_screen(loaded_data.is_empty())
+	else:
+		entered_from_suburb = PrologueState.consume_main_entry()
+		if entered_from_suburb:
+			_apply_prologue_entry()
+	_show_loading_screen(loaded_data.is_empty() and not entered_from_suburb, entered_from_suburb)
 
 func _process(delta: float) -> void:
 	if pause_menu_open:
@@ -491,6 +501,7 @@ func _restore_save_data(data: Dictionary) -> void:
 		player.global_position = saved_position
 	var inventory_data: Dictionary = data.get("inventory", {})
 	inventory.restore_snapshot(inventory_data)
+	player.equip_bag_weapon(StringName(inventory.equipped_bag_weapon))
 	var resources: Dictionary = data.get("resources", {})
 	cash = clampf(float(resources.get("cash", 5.0)), 0.0, 9999999.0)
 	alcohol_level = clampf(float(resources.get("alcohol", 28.0)), 0.0, 100.0)
@@ -619,6 +630,7 @@ func _create_player() -> void:
 	player.position = _map_marker_position("Start/Bohater", Vector2(850, 600))
 	player.z_index = 8
 	add_child(player)
+	player.equip_bag_weapon(StringName(inventory.equipped_bag_weapon))
 	var camera := Camera2D.new()
 	camera.name = "Kamera"
 	camera.position_smoothing_enabled = true
@@ -627,9 +639,22 @@ func _create_player() -> void:
 	camera.limit_left = 0
 	camera.limit_top = 0
 	camera.limit_right = int(WorldMapScript.WORLD_SIZE.x)
-	camera.limit_bottom = int(WorldMapScript.WORLD_SIZE.y)
+	camera.limit_bottom = int(WorldMapScript.WORLD_SIZE.y + HUD_CAMERA_BOTTOM_CLEARANCE_PX / camera.zoom.y)
 	camera.limit_smoothed = true
 	player.add_child(camera)
+
+func _apply_prologue_entry() -> void:
+	player.global_position = _map_marker_position("Start/WejscieZPrzedmiescia", Vector2(1400, 1520))
+	if PrologueState.current_health >= 0:
+		player_state.synchronize_health(PrologueState.current_health, PrologueState.maximum_health)
+	fab01_bag_picked = PrologueState.has_bag
+	fab01_stage = FAB01_BUY_NEEDS
+	if PrologueState.cans_collected > 0:
+		inventory.add_item("can", PrologueState.cans_collected)
+	inventory.equip_bag_weapon(PrologueState.equipped_bag_weapon)
+	if starter_bag != null and is_instance_valid(starter_bag):
+		starter_bag.queue_free()
+	_update_ui()
 
 func _create_world_interactions() -> void:
 	starter_bag = StarterBagScript.new()
@@ -1017,39 +1042,41 @@ func _create_hud(canvas: CanvasLayer) -> void:
 	bottom_hud_panel.anchor_bottom = 1.0
 	bottom_hud_panel.offset_left = 0
 	bottom_hud_panel.offset_right = 0
-	bottom_hud_panel.offset_top = -132
-	bottom_hud_panel.offset_bottom = -16
-	bottom_hud_panel.add_theme_stylebox_override("panel", _hud_panel_style())
+	bottom_hud_panel.offset_top = -76
+	bottom_hud_panel.offset_bottom = -14
+	bottom_hud_panel.add_theme_stylebox_override("panel", _compact_hud_panel_style())
 	canvas.add_child(bottom_hud_panel)
 	var resources := HBoxContainer.new()
 	resources.name = "PaskiZasobow"
 	resources.alignment = BoxContainer.ALIGNMENT_CENTER
-	resources.add_theme_constant_override("separation", 16)
+	resources.add_theme_constant_override("separation", 10)
 	bottom_hud_panel.add_child(resources)
 
-	var alcohol_box := _hud_resource_box(194)
+	var alcohol_box := _hud_resource_box(132)
 	resources.add_child(alcohol_box)
 	alcohol_label = _hud_resource_label("ALKOHOL", Color("#e4a464"))
+	alcohol_label.add_theme_font_size_override("font_size", 10)
 	alcohol_box.add_child(alcohol_label)
-	alcohol_bar = _hud_bar(Color("#b96b32"), 17)
+	alcohol_bar = _hud_bar(Color("#b96b32"), 10)
 	alcohol_bar.name = "AlkoholHUD"
 	alcohol_box.add_child(alcohol_bar)
 
-	var health_box := _hud_resource_box(390)
+	var health_box := _hud_resource_box(270)
 	health_box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	resources.add_child(health_box)
 	health_label = _hud_resource_label("ŻYCIE", Color("#f0d5cb"))
-	health_label.add_theme_font_size_override("font_size", 15)
+	health_label.add_theme_font_size_override("font_size", 12)
 	health_box.add_child(health_label)
-	health_bar = _hud_bar(Color("#a83d35"), 29)
+	health_bar = _hud_bar(Color("#a83d35"), 18)
 	health_bar.name = "ZdrowieBohateraHUD"
 	health_box.add_child(health_bar)
 
-	var nicotine_box := _hud_resource_box(194)
+	var nicotine_box := _hud_resource_box(132)
 	resources.add_child(nicotine_box)
 	nicotine_label = _hud_resource_label("NIKOTYNA", Color("#c5d19d"))
+	nicotine_label.add_theme_font_size_override("font_size", 10)
 	nicotine_box.add_child(nicotine_label)
-	nicotine_bar = _hud_bar(Color("#82965a"), 17)
+	nicotine_bar = _hud_bar(Color("#82965a"), 10)
 	nicotine_bar.name = "NikotynaHUD"
 	nicotine_box.add_child(nicotine_bar)
 
@@ -1057,7 +1084,7 @@ func _create_hud(canvas: CanvasLayer) -> void:
 	bag_hud_button.name = "PrzyciskTorbyHUD"
 	bag_hud_button.icon = BAG_HUD_ICON
 	bag_hud_button.expand_icon = true
-	bag_hud_button.custom_minimum_size = Vector2(74, 74)
+	bag_hud_button.custom_minimum_size = Vector2(48, 48)
 	bag_hud_button.tooltip_text = "Ekwipunek [I]"
 	bag_hud_button.focus_mode = Control.FOCUS_NONE
 	bag_hud_button.add_theme_stylebox_override("normal", _hud_bag_button_style(Color("#242820"), Color("#77745f")))
@@ -1066,7 +1093,7 @@ func _create_hud(canvas: CanvasLayer) -> void:
 	bag_hud_button.pressed.connect(_on_hud_bag_pressed)
 	resources.add_child(bag_hud_button)
 
-	message_label = _label("LPM na wrogu — atak  •  Strzałki / WASD — ruch  •  ENTER — akcja  •  I — ekwipunek", 14, Color("#eee6d7"))
+	message_label = _label("LPM — atak  •  WASD — ruch  •  ENTER — akcja  •  I — ekwipunek", 11, Color("#eee6d7"))
 	message_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	message_label.add_theme_color_override("font_shadow_color", Color.BLACK)
 	message_label.add_theme_constant_override("shadow_offset_x", 2)
@@ -1074,8 +1101,8 @@ func _create_hud(canvas: CanvasLayer) -> void:
 	message_label.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	message_label.offset_left = 160
 	message_label.offset_right = -160
-	message_label.offset_top = -171
-	message_label.offset_bottom = -143
+	message_label.offset_top = -108
+	message_label.offset_bottom = -86
 	canvas.add_child(message_label)
 	interaction_hint_label = _label("ENTER  —  AKCJA", 12, Color("#ffe29a"))
 	interaction_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -1085,8 +1112,8 @@ func _create_hud(canvas: CanvasLayer) -> void:
 	interaction_hint_label.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	interaction_hint_label.offset_left = 450
 	interaction_hint_label.offset_right = -450
-	interaction_hint_label.offset_top = -204
-	interaction_hint_label.offset_bottom = -180
+	interaction_hint_label.offset_top = -136
+	interaction_hint_label.offset_bottom = -114
 	interaction_hint_label.visible = false
 	canvas.add_child(interaction_hint_label)
 	var hint := _label("AUTOMAT 0,60 ZŁ  •  MIREK 0,85 ZŁ PO ZADANIU", 10, Color("#c8c3b6"))
@@ -1464,6 +1491,16 @@ func _rebuild_inventory_ui() -> void:
 	if inventory.tools.has("metal_shears"):
 		tool_text = "Nożyce do metalu: %d/%d trwałości" % [inventory.tool_durability("metal_shears"), inventory.tool_max_durability("metal_shears")]
 	equipment_column.add_child(_label(tool_text, 14, Color("#eee6d7")))
+	equipment_column.add_child(_label("BROŃ TORBOWA — osobno od pojemnika", 13, Color("#d8c69b")))
+	for weapon_key in BagWeaponCatalogScript.WEAPONS:
+		var weapon_id := String(weapon_key)
+		if inventory.owned_bag_weapons.has(weapon_id):
+			var weapon_definition: Dictionary = BagWeaponCatalogScript.definition(StringName(weapon_id))
+			var weapon_prefix := "[W DŁONI] " if inventory.equipped_bag_weapon == weapon_id else "WEŹ "
+			var weapon_button := _menu_button(weapon_prefix + String(weapon_definition.name).to_upper())
+			weapon_button.disabled = inventory.equipped_bag_weapon == weapon_id
+			weapon_button.pressed.connect(func() -> void: _equip_bag_weapon(weapon_id))
+			equipment_column.add_child(weapon_button)
 	equipment_column.add_child(_label("POJEMNIKI", 13, Color("#d8c69b")))
 	for container_id in PlayerInventory.CONTAINERS:
 		if inventory.owned_containers.has(container_id):
@@ -1509,6 +1546,18 @@ func _equip_container(container_id: String) -> void:
 	else:
 		_show_message("Ten pojemnik jest za mały na obecną zawartość.", true)
 	_rebuild_inventory_ui()
+
+func _equip_bag_weapon(weapon_id: String) -> void:
+	if inventory.equip_bag_weapon(weapon_id):
+		_show_message("Broń w dłoni: %s." % inventory.bag_weapon_name())
+	else:
+		_show_message("Nie masz takiej torby do walki.", true)
+	_rebuild_inventory_ui()
+
+func _on_inventory_changed() -> void:
+	if player != null:
+		player.equip_bag_weapon(StringName(inventory.equipped_bag_weapon))
+	_update_ui()
 
 func _xp_for_next_level() -> int:
 	return 25 + (player_level - 1) * 20
@@ -2305,6 +2354,11 @@ func _hud_panel_style() -> StyleBoxFlat:
 	style.set_content_margin_all(14)
 	return style
 
+func _compact_hud_panel_style() -> StyleBoxFlat:
+	var style := _hud_panel_style()
+	style.set_content_margin_all(7)
+	return style
+
 func _hud_bag_button_style(background_color: Color, border_color: Color) -> StyleBoxFlat:
 	var style := StyleBoxFlat.new()
 	style.bg_color = background_color
@@ -2397,7 +2451,7 @@ func _begin_fab01_gameplay() -> void:
 	_show_message("Podejdź do reklamówki i naciśnij Enter.")
 	_update_ui()
 
-func _show_loading_screen(show_intro := true) -> void:
+func _show_loading_screen(show_intro := true, entered_from_suburb := false) -> void:
 	player.set_physics_process(false)
 	var canvas := CanvasLayer.new()
 	canvas.name = "EkranLadowania"
@@ -2432,5 +2486,8 @@ func _show_loading_screen(show_intro := true) -> void:
 	else:
 		gameplay_active = true
 		player.set_physics_process(true)
-		_show_message("Wczytano zapis ze slotu %d." % _save_manager().current_slot)
+		if entered_from_suburb:
+			_show_message("Dotarłeś z przedmieścia na osiedle. Kiosk i Żuk Gnojarz są dalej na północy.")
+		else:
+			_show_message("Wczytano zapis ze slotu %d." % _save_manager().current_slot)
 		_update_ui()

@@ -1,6 +1,7 @@
 extends Control
 
-const GAME_SCENE := "res://scenes/main.tscn"
+const NEW_GAME_SCENE := "res://scenes/melina_prologue_mockup.tscn"
+const SAVED_GAME_SCENE := "res://scenes/main.tscn"
 const SaveManagerScript := preload("res://scripts/save_manager.gd")
 
 var main_box: VBoxContainer
@@ -114,13 +115,13 @@ func _refresh_slots() -> void:
 
 func _start_new_game() -> void:
 	_save_manager().start_new_game()
-	get_tree().change_scene_to_file(GAME_SCENE)
+	get_tree().change_scene_to_file(NEW_GAME_SCENE)
 
 func _load_slot(slot: int) -> void:
 	if not _save_manager().request_load(slot):
 		status_label.text = "Nie udało się odczytać slotu %d." % slot
 		return
-	get_tree().change_scene_to_file(GAME_SCENE)
+	get_tree().change_scene_to_file(SAVED_GAME_SCENE)
 
 func _save_manager() -> GameSaveManager:
 	var manager := get_node_or_null("/root/SaveManager") as GameSaveManager

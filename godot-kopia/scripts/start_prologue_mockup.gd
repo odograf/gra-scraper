@@ -11,8 +11,6 @@ const PrologueState := preload("res://scripts/prologue_mockup_state.gd")
 const GRASS_TEXTURE := preload("res://assets/terrain/grass_base_v1.png")
 const ASPHALT_TEXTURE := preload("res://assets/terrain/asphalt_base_v1.png")
 const SIDEWALK_TEXTURE := preload("res://assets/terrain/sidewalk_base_v1.png")
-const KIOSK_TEXTURE := preload("res://assets/buildings/kiosk_v1.png")
-const STORE_TEXTURE := preload("res://assets/buildings/zuk_gnojarz_v1.png")
 const BINS_TEXTURE := preload("res://assets/props/trash_bins.png")
 const CAN_CRATE_TEXTURE := preload("res://assets/props/crate_cans_v1.png")
 const SCRAP_CRATE_TEXTURE := preload("res://assets/props/crate_scrap_v1.png")
@@ -25,6 +23,10 @@ const EXIT_POSITION := Vector2(288, 570)
 const OUTSIDE_SPAWN := Vector2(1010, 940)
 const OUTSIDE_SCENE := "res://scenes/start_suburb_mockup.tscn"
 const MELINA_SCENE := "res://scenes/melina_prologue_mockup.tscn"
+const MAIN_SCENE := "res://scenes/main.tscn"
+const NORTH_GATE_CENTER := 1360.0
+const NORTH_GATE_HALF_WIDTH := 180.0
+const HUD_CAMERA_BOTTOM_CLEARANCE_PX := 62.0
 
 enum Stage { INTRO_DIALOGUE, TAKE_BAG, BAG_DIALOGUE, COLLECT_CANS, CANS_DIALOGUE, EXIT_MELINA, OUTSIDE }
 enum Location { MELINA, SUBURB }
@@ -38,6 +40,7 @@ var starter_bag: StarterBag
 var active_cans: Array[PickupCan] = []
 var enemies: Array[RealtimeEnemy] = []
 var cans_collected := 0
+var transition_in_progress := false
 
 var dialogue_overlay: Control
 var dialogue_label: Label
@@ -48,6 +51,11 @@ var dialogue_finished := Callable()
 var phase_label: Label
 var status_label: Label
 var hint_label: Label
+var health_label: Label
+var health_bar: ProgressBar
+var weapon_overlay: Control
+var weapon_box: VBoxContainer
+var weapon_open := false
 
 func _ready() -> void:
 	_create_static_geometry()
@@ -67,10 +75,30 @@ func _ready() -> void:
 		_show_intro_dialogue()
 	else:
 		dialogue_overlay.visible = false
-		_set_hint("Samotny pies jest najbliżej. Dalej czeka wataha dwóch i cztery szczury.")
+		_set_hint("Samotny pies jest najbliżej. I — wybór broni torbowej.")
 	queue_redraw()
 
+func _physics_process(_delta: float) -> void:
+	if location_mode != Location.SUBURB or player == null or not is_instance_valid(player):
+		return
+	if player.global_position.y <= 42.0 and absf(player.global_position.x - NORTH_GATE_CENTER) <= NORTH_GATE_HALF_WIDTH:
+		_try_enter_main_map()
+
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_I:
+		if weapon_open:
+			_close_weapon_inventory()
+		elif PrologueState.has_bag:
+			_open_weapon_inventory()
+		else:
+			_set_hint("Najpierw podnieś siateczkę.")
+		get_viewport().set_input_as_handled()
+		return
+	if weapon_open:
+		if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ESCAPE:
+			_close_weapon_inventory()
+			get_viewport().set_input_as_handled()
+		return
 	if dialogue_overlay != null and dialogue_overlay.visible:
 		return
 	if event is InputEventMouseButton and event.pressed:
@@ -97,7 +125,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.keycode == KEY_ENTER:
 		_try_nearby_interaction()
 	elif event.keycode == KEY_F1:
-		get_tree().change_scene_to_file("res://scenes/main.tscn")
+		get_tree().change_scene_to_file(MAIN_SCENE)
 	elif event.keycode == KEY_F2:
 		get_tree().change_scene_to_file(MELINA_SCENE)
 
@@ -160,6 +188,13 @@ func _draw_route_markers() -> void:
 		draw_string(ThemeDB.fallback_font, EXIT_POSITION + Vector2(-85, -72), "WYJŚCIE ODBLOKOWANE", HORIZONTAL_ALIGNMENT_CENTER, 170, 14, Color("#efb647"))
 	if stage == Stage.OUTSIDE:
 		draw_string(ThemeDB.fallback_font, Vector2(830, 560), "PRZEDMIEŚCIE — DROGA DO AUTOMATU", HORIZONTAL_ALIGNMENT_LEFT, -1, 18, Color("#efe1b7"))
+		draw_line(Vector2(NORTH_GATE_CENTER, 150), Vector2(NORTH_GATE_CENTER, 55), Color("#efb647"), 8.0)
+		draw_colored_polygon(PackedVector2Array([
+			Vector2(NORTH_GATE_CENTER, 38),
+			Vector2(NORTH_GATE_CENTER - 24, 76),
+			Vector2(NORTH_GATE_CENTER + 24, 76)
+		]), Color("#efb647"))
+		draw_string(ThemeDB.fallback_font, Vector2(NORTH_GATE_CENTER - 190, 185), "PÓŁNOC — OSIEDLE", HORIZONTAL_ALIGNMENT_CENTER, 380, 20, Color("#efcf77"))
 
 func _draw_tiled_texture(texture: Texture2D, area: Rect2, tint: Color) -> void:
 	var tile := Vector2(128, 128)
@@ -178,6 +213,7 @@ func _create_player() -> void:
 	player.z_index = 10
 	player.player_state = player_state
 	add_child(player)
+	player.equip_bag_weapon(StringName(PrologueState.equipped_bag_weapon))
 	if location_mode == Location.SUBURB and PrologueState.current_health >= 0:
 		player_state.synchronize_health(PrologueState.current_health, PrologueState.maximum_health)
 	var camera := Camera2D.new()
@@ -187,7 +223,7 @@ func _create_player() -> void:
 	camera.limit_left = 0
 	camera.limit_top = 0
 	camera.limit_right = int(WORLD_SIZE.x)
-	camera.limit_bottom = int(WORLD_SIZE.y)
+	camera.limit_bottom = int(WORLD_SIZE.y + HUD_CAMERA_BOTTOM_CLEARANCE_PX)
 	player.add_child(camera)
 
 func _create_tutorial_objects() -> void:
@@ -249,8 +285,6 @@ func _create_rat(node_name: String, enemy_position: Vector2) -> void:
 	enemies.append(rat)
 
 func _create_environment_assets() -> void:
-	_add_sprite("KioskOrientacyjny", KIOSK_TEXTURE, Vector2(1770, 255), 0.17, 2)
-	_add_sprite("ZukGnojarzOrientacyjny", STORE_TEXTURE, Vector2(2310, 300), 0.23, 2)
 	_add_sprite("KoszePrzyDrodze", BINS_TEXTURE, Vector2(1580, 920), 0.18, 4)
 	_add_sprite("SkrzynkaPuszek", CAN_CRATE_TEXTURE, Vector2(1080, 1070), 0.16, 4)
 	_add_sprite("SkrzynkaZlomu", SCRAP_CRATE_TEXTURE, Vector2(2330, 1080), 0.16, 4)
@@ -271,7 +305,13 @@ func _add_sprite(node_name: String, texture: Texture2D, sprite_position: Vector2
 	add_child(sprite)
 
 func _create_static_geometry() -> void:
-	_add_static_rect(Rect2(-30, -30, WORLD_SIZE.x + 60, 40), "GranicaGora")
+	if location_mode == Location.SUBURB:
+		var gate_left := NORTH_GATE_CENTER - NORTH_GATE_HALF_WIDTH
+		var gate_right := NORTH_GATE_CENTER + NORTH_GATE_HALF_WIDTH
+		_add_static_rect(Rect2(-30, -30, gate_left + 30, 40), "GranicaGoraLewa")
+		_add_static_rect(Rect2(gate_right, -30, WORLD_SIZE.x - gate_right + 30, 40), "GranicaGoraPrawa")
+	else:
+		_add_static_rect(Rect2(-30, -30, WORLD_SIZE.x + 60, 40), "GranicaGora")
 	_add_static_rect(Rect2(-30, WORLD_SIZE.y - 10, WORLD_SIZE.x + 60, 40), "GranicaDol")
 	_add_static_rect(Rect2(-30, 0, 40, WORLD_SIZE.y), "GranicaLewa")
 	_add_static_rect(Rect2(WORLD_SIZE.x - 10, 0, 40, WORLD_SIZE.y), "GranicaPrawa")
@@ -321,7 +361,120 @@ func _create_ui() -> void:
 	top_box.add_child(phase_label)
 	top_box.add_child(status_label)
 	top_box.add_child(hint_label)
+	_create_health_hud(canvas)
 	_create_dialogue_ui(canvas)
+	_create_weapon_inventory_ui(canvas)
+
+func _create_weapon_inventory_ui(canvas: CanvasLayer) -> void:
+	weapon_overlay = Control.new()
+	weapon_overlay.name = "WyborBroniTorbowej"
+	weapon_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	weapon_overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	weapon_overlay.visible = false
+	canvas.add_child(weapon_overlay)
+	var shade := ColorRect.new()
+	shade.color = Color("#0709069c")
+	shade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	shade.mouse_filter = Control.MOUSE_FILTER_STOP
+	weapon_overlay.add_child(shade)
+	var panel := PanelContainer.new()
+	panel.set_anchors_preset(Control.PRESET_CENTER)
+	panel.position = Vector2(-270, -190)
+	panel.custom_minimum_size = Vector2(540, 380)
+	panel.add_theme_stylebox_override("panel", _panel_style(Color("#151914fa"), Color("#c8a85e"), 3))
+	weapon_overlay.add_child(panel)
+	weapon_box = VBoxContainer.new()
+	weapon_box.add_theme_constant_override("separation", 12)
+	panel.add_child(weapon_box)
+	_rebuild_weapon_inventory()
+
+func _rebuild_weapon_inventory() -> void:
+	if weapon_box == null:
+		return
+	for child in weapon_box.get_children():
+		weapon_box.remove_child(child)
+		child.queue_free()
+	var title := _label("BROŃ TORBOWA", 25, Color("#efb647"))
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	weapon_box.add_child(title)
+	var description := _label("Pojemnik na łupy i broń są osobnym wyposażeniem.\nZmiana torby nie zmienia animacji ciała bohatera.", 14, Color("#ddd5c4"))
+	description.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	weapon_box.add_child(description)
+	_add_weapon_choice(&"plastic_bag", "REKLAMÓWKA")
+	_add_weapon_choice(&"black_sack", "CZARNY WOREK")
+	var close := _weapon_button("ZAMKNIJ — I / ESC")
+	close.pressed.connect(_close_weapon_inventory)
+	weapon_box.add_child(close)
+
+func _add_weapon_choice(weapon_id: StringName, display_name: String) -> void:
+	var equipped := PrologueState.equipped_bag_weapon == String(weapon_id)
+	var prefix := "[W DŁONI] " if equipped else "WEŹ "
+	var button := _weapon_button(prefix + display_name)
+	button.disabled = equipped
+	button.pressed.connect(func() -> void: _equip_prologue_weapon(weapon_id))
+	weapon_box.add_child(button)
+
+func _weapon_button(text: String) -> Button:
+	var button := Button.new()
+	button.text = text
+	button.custom_minimum_size = Vector2(480, 48)
+	button.add_theme_font_size_override("font_size", 16)
+	return button
+
+func _open_weapon_inventory() -> void:
+	weapon_open = true
+	player.cancel_move_target()
+	player.set_physics_process(false)
+	_rebuild_weapon_inventory()
+	weapon_overlay.visible = true
+
+func _close_weapon_inventory() -> void:
+	weapon_open = false
+	weapon_overlay.visible = false
+	if dialogue_overlay == null or not dialogue_overlay.visible:
+		player.set_physics_process(player_state.current_health > 0)
+
+func _equip_prologue_weapon(weapon_id: StringName) -> void:
+	if player.equip_bag_weapon(weapon_id):
+		PrologueState.equipped_bag_weapon = String(weapon_id)
+		_set_hint("Broń w dłoni: %s." % player.equipped_bag_weapon_name())
+	_rebuild_weapon_inventory()
+
+func _create_health_hud(canvas: CanvasLayer) -> void:
+	var panel := PanelContainer.new()
+	panel.name = "DolnyHUDPrologu"
+	panel.anchor_left = 0.33
+	panel.anchor_right = 0.67
+	panel.anchor_top = 1.0
+	panel.anchor_bottom = 1.0
+	panel.offset_top = -58
+	panel.offset_bottom = -14
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_theme_stylebox_override("panel", _compact_panel_style(Color("#151814f2"), Color("#77745f")))
+	canvas.add_child(panel)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 3)
+	panel.add_child(box)
+	health_label = _label("ŻYCIE: 100/100", 11, Color("#f0d5cb"))
+	health_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(health_label)
+	health_bar = ProgressBar.new()
+	health_bar.name = "ZdrowieBohateraHUD"
+	health_bar.min_value = 0.0
+	health_bar.max_value = 100.0
+	health_bar.show_percentage = false
+	health_bar.custom_minimum_size.y = 13
+	var background := StyleBoxFlat.new()
+	background.bg_color = Color("#090b09ed")
+	background.border_color = Color("#56584d")
+	background.set_border_width_all(1)
+	background.set_corner_radius_all(3)
+	var fill := StyleBoxFlat.new()
+	fill.bg_color = Color("#a83d35")
+	fill.set_corner_radius_all(2)
+	health_bar.add_theme_stylebox_override("background", background)
+	health_bar.add_theme_stylebox_override("fill", fill)
+	box.add_child(health_bar)
 
 func _create_dialogue_ui(canvas: CanvasLayer) -> void:
 	dialogue_overlay = Control.new()
@@ -389,7 +542,7 @@ func _on_bag_picked() -> void:
 func _begin_can_step() -> void:
 	stage = Stage.COLLECT_CANS
 	player.set_physics_process(true)
-	_set_hint("Zbierz wszystkie sześć puszek w melinie.")
+	_set_hint("Zbierz wszystkie sześć puszek w melinie. I — wybór broni.")
 	_update_ui()
 
 func _on_can_collected(can: PickupCan) -> void:
@@ -440,6 +593,22 @@ func _handle_exit_click() -> bool:
 	if viewport != null:
 		viewport.set_input_as_handled()
 	return _try_exit_melina()
+
+func _try_enter_main_map() -> bool:
+	if location_mode != Location.SUBURB or transition_in_progress:
+		return false
+	transition_in_progress = true
+	player.cancel_move_target()
+	PrologueState.has_bag = true
+	PrologueState.cans_collected = maxi(6, cans_collected)
+	PrologueState.prepare_main_entry(player_state.current_health, player_state.maximum_health)
+	var error := get_tree().change_scene_to_file(MAIN_SCENE)
+	if error != OK:
+		transition_in_progress = false
+		PrologueState.main_entry_pending = false
+		_set_hint("Nie udało się wczytać osiedla na północy.")
+		return false
+	return true
 
 func _try_nearby_interaction() -> void:
 	if stage == Stage.TAKE_BAG and starter_bag != null and is_instance_valid(starter_bag):
@@ -535,10 +704,14 @@ func _update_ui() -> void:
 		return
 	var phase_texts := [
 		"PROLOG-00 — POBUDKA", "PROLOG-00 — PODNIEŚ SIATECZKĘ", "PROLOG-00 — SIATECZKA",
-		"PROLOG-00 — ZBIERZ 6 PUSZEK", "PROLOG-00 — WYJŚCIE", "PROLOG-00 — DRZWI", "PRZEDMIEŚCIE — MOCKUP"
+		"PROLOG-00 — ZBIERZ 6 PUSZEK", "PROLOG-00 — WYJŚCIE", "PROLOG-00 — DRZWI", "PRZEDMIEŚCIE"
 	]
 	phase_label.text = phase_texts[stage]
-	status_label.text = "PUSZKI: %d/6   •   ŻYCIE: %d/%d" % [cans_collected, player_state.current_health, player_state.maximum_health]
+	status_label.text = "PUSZKI: %d/6  •  BROŃ: %s" % [cans_collected, player.equipped_bag_weapon_name().to_upper()]
+	if health_label != null and health_bar != null:
+		health_label.text = "ŻYCIE: %d/%d" % [player_state.current_health, player_state.maximum_health]
+		health_bar.max_value = player_state.maximum_health
+		health_bar.value = player_state.current_health
 
 func _set_hint(text: String) -> void:
 	if hint_label != null:
@@ -552,6 +725,12 @@ func _panel_style(background: Color, border: Color, width := 2) -> StyleBoxFlat:
 	style.set_content_margin_all(14)
 	style.shadow_color = Color("#05070588")
 	style.shadow_size = 8
+	return style
+
+func _compact_panel_style(background: Color, border: Color) -> StyleBoxFlat:
+	var style := _panel_style(background, border)
+	style.set_content_margin_all(6)
+	style.shadow_size = 5
 	return style
 
 func _label(text: String, font_size: int, color: Color) -> Label:

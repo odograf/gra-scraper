@@ -4,6 +4,7 @@ extends RefCounted
 signal changed
 
 const ItemCatalogScript := preload("res://scripts/item_catalog.gd")
+const BagWeaponCatalogScript := preload("res://scripts/bag_weapon_catalog.gd")
 const ITEMS := ItemCatalogScript.ITEMS
 
 # Tymczasowy przełącznik prototypowy. Definicje pojemników pozostają zachowane,
@@ -25,6 +26,9 @@ var items := {
 }
 var owned_containers := {"plastic_bag": true}
 var equipped_container := "plastic_bag"
+var owned_bag_weapons := {"plastic_bag": true, "black_sack": true}
+var equipped_bag_weapon := "plastic_bag"
+var bag_weapon_upgrades: Dictionary = {"plastic_bag": [], "black_sack": []}
 var tools: Dictionary = {}
 
 func save_snapshot() -> Dictionary:
@@ -32,6 +36,9 @@ func save_snapshot() -> Dictionary:
 		"items": items.duplicate(true),
 		"owned_containers": owned_containers.duplicate(true),
 		"equipped_container": equipped_container,
+		"owned_bag_weapons": owned_bag_weapons.duplicate(true),
+		"equipped_bag_weapon": equipped_bag_weapon,
+		"bag_weapon_upgrades": bag_weapon_upgrades.duplicate(true),
 		"tools": tools.duplicate(true)
 	}
 
@@ -46,6 +53,19 @@ func restore_snapshot(data: Dictionary) -> void:
 			owned_containers[container_id] = true
 	var requested_container := String(data.get("equipped_container", "plastic_bag"))
 	equipped_container = requested_container if owned_containers.has(requested_container) else "plastic_bag"
+	owned_bag_weapons = {"plastic_bag": true, "black_sack": true}
+	var saved_bag_weapons: Dictionary = data.get("owned_bag_weapons", {})
+	for weapon_id in saved_bag_weapons:
+		var typed_weapon_id := StringName(weapon_id)
+		if BagWeaponCatalogScript.has_weapon(typed_weapon_id) and bool(saved_bag_weapons[weapon_id]):
+			owned_bag_weapons[String(typed_weapon_id)] = true
+	var requested_weapon := StringName(data.get("equipped_bag_weapon", "plastic_bag"))
+	equipped_bag_weapon = String(requested_weapon) if owned_bag_weapons.has(String(requested_weapon)) else "plastic_bag"
+	bag_weapon_upgrades = {"plastic_bag": [], "black_sack": []}
+	var saved_upgrades: Dictionary = data.get("bag_weapon_upgrades", {})
+	for weapon_id in saved_upgrades:
+		if owned_bag_weapons.has(String(weapon_id)) and saved_upgrades[weapon_id] is Array:
+			bag_weapon_upgrades[String(weapon_id)] = (saved_upgrades[weapon_id] as Array).duplicate()
 	tools.clear()
 	var saved_tools: Dictionary = data.get("tools", {})
 	for tool_id in saved_tools:
@@ -124,6 +144,16 @@ func equip_container(container_id: String) -> bool:
 	equipped_container = container_id
 	changed.emit()
 	return true
+
+func equip_bag_weapon(weapon_id: String) -> bool:
+	if not owned_bag_weapons.has(weapon_id) or not BagWeaponCatalogScript.has_weapon(StringName(weapon_id)):
+		return false
+	equipped_bag_weapon = weapon_id
+	changed.emit()
+	return true
+
+func bag_weapon_name() -> String:
+	return BagWeaponCatalogScript.display_name(StringName(equipped_bag_weapon))
 
 # Narzędzia są osobnym wyposażeniem. Nie są uwzględniane w used_space() ani current_weight().
 func add_tool(tool_id: String, durability: int) -> void:

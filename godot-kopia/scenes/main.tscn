@@ -7,4 +7,3 @@
 script = ExtResource("1_main")
 
 [node name="Osiedle" parent="." unique_id=1805184768 instance=ExtResource("2_world")]
-position = Vector2(600, 36)

@@ -191,6 +191,15 @@ Narzędzie nie jest tylko przedmiotem zwiększającym statystykę. Powinno otwie
 - Kolejka przechowuje jeden cel. Kolejny klik mapy zastępuje poprzedni, więc ostatnia komenda gracza ma pierwszeństwo.
 - Kliknięcie innego przeciwnika podczas trwającego ataku nie kolejkuje kolejnego ciosu. Obecny bufor dotyczy wyłącznie ruchu.
 
+### MEC-036: Broń torbowa oddzielona od bohatera — wdrożone
+
+- Bohater walczy wyłącznie torbami i workami. Inne narzędzia pozostają wyposażeniem gospodarczym lub osobnymi akcjami, a nie podmianą podstawowej broni.
+- Ośmioklatkowa animacja zamachu ciała jest niezależna od grafiki trzymanej torby. Wyposażona broń korzysta z osobnej, zsynchronizowanej warstwy, więc nowy model nie wymaga ponownego animowania bohatera.
+- Wdrożone warianty to startowa `Reklamówka` oraz prototypowy `Czarny worek`. Oba można przełączać w ekranie ekwipunku pod `I`, a wybór jest zapisywany w slocie gry.
+- Broń torbowa jest osobną kategorią od pojemnika na łupy: można nieść przedmioty w jednym pojemniku i walczyć inną torbą.
+- Reklamówka oraz kolejne worki mają przygotowane miejsca na przyszłe ulepszenia. Planowane modyfikacje, np. taśma, wzmocnienie uchwytów lub cięższe wypełnienie, mają zmieniać dane i warstwę broni, nie arkusz ciała.
+- Czarny worek ma obecnie ten sam balans obrażeń co reklamówka; wartości zostaną rozdzielone dopiero po decyzji o trwałości, masie, zasięgu i kosztach ulepszeń.
+
 ### MEC-030: Szczór — prosty przeciwnik czasu rzeczywistego
 
 - Przy dolnych garażach stoją trzy Szczóry: jeden samotny oraz para. Ich pozycje są markerami w `scenes/world_map.tscn`, więc można je przesuwać w edytorze 2D.

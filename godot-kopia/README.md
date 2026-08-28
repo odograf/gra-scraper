@@ -20,11 +20,13 @@ Nowy układ startu jest osobną sceną i nie zastępuje jeszcze obecnej gry:
 3. W mockupie naciśnij **F1**, aby wrócić do obecnej sceny głównej.
 4. **F5** uruchamia menu główne; właściwa rozgrywka zaczyna się po wybraniu `Nowa gra` albo slotu zapisu.
 
-Melina i przedmieście są osobnymi scenami. Drzwi po zebraniu sześciu puszek przełączają grę z `melina_prologue_mockup.tscn` do `start_suburb_mockup.tscn`, zachowując reklamówkę, puszki i zdrowie. **F2** uruchamia melinę od początku. Lista brakujących docelowych grafik znajduje się w `docs/PROLOG_MAP_MOCKUP.md`.
+Melina i przedmieście są osobnymi scenami. Nowa gra zaczyna się w melinie. Drzwi po zebraniu sześciu puszek prowadzą na przedmieście, a północna brama prowadzi dalej na pełną mapę osiedla, zachowując reklamówkę, puszki i zdrowie. Jedyny kiosk i jedyny sklep Żuk Gnojarz znajdują się na osiedlu. **F2** uruchamia melinę od początku. Lista brakujących docelowych grafik znajduje się w `docs/PROLOG_MAP_MOCKUP.md`.
 
 ## Edycja mapy w Godocie
 
 Mapa jest zapisana jako osobna scena [world_map.tscn](scenes/world_map.tscn) i jest widoczna bez uruchamiania gry.
+
+Ustalenia dotyczące układu mapy zapisujemy prostym językiem w `MAPA.md`. Można dopisać pojedynczą linię zaczynającą się od `POMYSŁ:`, `DECYZJA:` albo `PROBLEM:`; skill `kartograf` wykorzysta ją podczas kolejnej pracy nad mapą.
 
 1. W panelu `System plików` otwórz `scenes/world_map.tscn`.
 2. Zaznacz `TerenBazowy`, aby malować trawę, chodniki i asfalt narzędziami `TileMapLayer`.
@@ -37,13 +39,13 @@ Mapa jest zapisana jako osobna scena [world_map.tscn](scenes/world_map.tscn) i j
 
 - **lewy przycisk na ziemi** — ruch bohatera do wskazanego punktu,
 - **lewy przycisk na przeciwniku** — podejście w zasięg i atak wybranego celu,
-- **prawy przycisk myszy** — szeroki zamach reklamówką jak przy rzucie młotem,
+- **prawy przycisk myszy** — szeroki zamach aktualnie wyposażoną torbą jak przy rzucie młotem,
 - **strzałki** lub **WASD** — awaryjne sterowanie bezpośrednie i anulowanie marszu,
 - **Enter** — wykonanie najbliższej podświetlonej akcji: podniesienie, rozmowa, sklep, walka, automat, kontenery lub siatka,
 - **strzałki** albo **WASD w menu** — zmiana zaznaczonej opcji,
 - **Enter w menu i dialogu** — zatwierdzenie zaznaczonej opcji,
 - **lewy przycisk myszy na przedmiocie** — alternatywne podniesienie, gdy bohater jest blisko,
-- **I** — ekwipunek, pojemniki, trwałość narzędzi i rozwój statystyk,
+- **I** — ekwipunek i wybór broni torbowej; działa również w melinie i na przedmieściu po podniesieniu reklamówki,
 - **ikona torby w dolnym HUD-zie** — otwiera ten sam ekran ekwipunku co klawisz I,
 - **lewy przycisk na NPC, drzwiach, automacie lub płocie** — interakcja,
 - **ESC** — zamknięcie aktywnego okna lub anulowanie wycinania siatki; na mapie otwiera menu pauzy z zapisem gry.
@@ -62,7 +64,7 @@ Mapa jest zapisana jako osobna scena [world_map.tscn](scenes/world_map.tscn) i j
 - wersjonowany zapis stanu bohatera, ekwipunku, zadań, świata, przeciwników i leżących dropów,
 - dolny HUD: duży centralny pasek życia, mniejsze paski alkoholu i nikotyny po bokach oraz przycisk torby; informacje o pieniądzach, pojemniku i poziomie pozostają w kompaktowym panelu u góry,
 - ruch point & click z marszem po skosie, znacznikiem celu i zatrzymaniem przy kolizji; klik mapy podczas zamachu kolejkuje płynny ruch wykonywany zaraz po animacji,
-- pierwszy atak czasu rzeczywistego: osobna 8-klatkowa animacja zamachu reklamówką i aktywny hitbox trafiający każdy cel najwyżej raz,
+- pierwszy atak czasu rzeczywistego: 8-klatkowy ruch ciała i osobna zsynchronizowana warstwa broni; reklamówkę można zamienić na czarny worek bez duplikowania animacji bohatera,
 - wspólny system walki: bohater ma 100 HP, atak 10, obronę 0, zwinność 10 i zasięg 2; jego pasek życia jest widoczny w HUD-zie,
 - pierwszy pełny przeciwnik czasu rzeczywistego: dziki pies poziomu 1 z 30 HP, atakiem 5, zasięgiem 1 i nagrodą 50 XP,
 - prosty przeciwnik „Szczór”: trzy osobniki przy dolnych garażach, 12 HP, 2 obrażenia, krótki zasięg wykrywania, zapowiadane ugryzienie, 8 XP i osobna animacja śmierci,

@@ -6,16 +6,19 @@ signal spin_attack_hit(target: Area2D, damage: int)
 signal target_attack_hit(target: Node2D, damage: int)
 
 const CombatantConfigScript := preload("res://scripts/combatant_config.gd")
+const BagWeaponCatalogScript := preload("res://scripts/bag_weapon_catalog.gd")
 const LOCOMOTION_SHEET := preload("res://assets/characters/collector_walk_sheet_v3_canonical.png")
 const ACTION_SHEET := preload("res://assets/characters/collector_actions_v2_canonical.png")
-const BAG_HAMMER_ATTACK_SHEET := preload("res://assets/characters/collector_bag_hammer_attack_v3_canonical.png")
+const BAG_ATTACK_BODY_SHEET := preload("res://assets/characters/collector_bag_attack_body_v1.png")
+const BODY_BACKGROUND_SHADER := preload("res://assets/shaders/key_black_background.gdshader")
+const LIGHT_BACKGROUND_SHADER := preload("res://assets/shaders/key_light_checkerboard.gdshader")
 const LOCOMOTION_FRAME_SIZE := Vector2i(429, 305)
 const ACTION_FRAME_SIZE := Vector2i(256, 256)
-const BAG_HAMMER_FRAME_SIZE := Vector2i(640, 480)
+const BAG_ATTACK_BODY_FRAME_SIZE := Vector2i(512, 384)
 const LOCOMOTION_COLUMNS := 3
 const LOCOMOTION_SCALE := 0.37
 const ACTION_SCALE := 0.52
-const BAG_HAMMER_SCALE := 0.33
+const BAG_ATTACK_SCALE := 0.43
 const SPEED := 220.0
 const TARGET_REACHED_DISTANCE := 10.0
 const STUCK_CANCEL_TIME := 0.45
@@ -43,6 +46,9 @@ const LOCOMOTION_FRAME_ANCHORS := {
 
 var facing := "down"
 var sprite: AnimatedSprite2D
+var weapon_sprite: AnimatedSprite2D
+var body_attack_material: ShaderMaterial
+var equipped_bag_weapon: StringName = BagWeaponCatalogScript.DEFAULT_WEAPON_ID
 var frame_anchors: Dictionary = {}
 var action_locked := false
 var current_action := ""
@@ -65,6 +71,7 @@ func _ready() -> void:
 	_create_target_marker()
 	_create_spin_attack()
 	_create_sprite()
+	_create_weapon_sprite()
 	_create_collision()
 	action_timer = Timer.new()
 	action_timer.name = "CzasAkcji"
@@ -156,7 +163,7 @@ func start_spin_attack() -> bool:
 	current_action = "spin_attack"
 	velocity = Vector2.ZERO
 	hit_targets.clear()
-	sprite.play("bag_hammer_attack")
+	_play_bag_attack()
 	_run_spin_attack_window()
 	return true
 
@@ -170,9 +177,10 @@ func request_target_attack(target: Node2D) -> bool:
 	return true
 
 func attack_damage() -> int:
+	var weapon_bonus := int(BagWeaponCatalogScript.definition(equipped_bag_weapon).damage_bonus)
 	if player_state != null:
-		return player_state.realtime_attack_damage()
-	return int(CombatantConfigScript.PLAYER.attack)
+		return player_state.realtime_attack_damage() + weapon_bonus
+	return int(CombatantConfigScript.PLAYER.attack) + weapon_bonus
 
 func attack_range_pixels() -> float:
 	return CombatantConfigScript.range_in_pixels(int(CombatantConfigScript.PLAYER.attack_range))
@@ -185,7 +193,7 @@ func _start_target_attack(target: Node2D) -> bool:
 	action_locked = true
 	current_action = "target_attack"
 	velocity = Vector2.ZERO
-	sprite.play("bag_hammer_attack")
+	_play_bag_attack()
 	_run_target_attack(target)
 	return true
 
@@ -221,9 +229,10 @@ func _register_spin_hit(area: Area2D) -> void:
 	if hit_targets.has(target_id):
 		return
 	hit_targets[target_id] = true
+	var damage := SPIN_ATTACK_DAMAGE + int(BagWeaponCatalogScript.definition(equipped_bag_weapon).damage_bonus)
 	if area.has_method("receive_realtime_hit"):
-		area.call("receive_realtime_hit", SPIN_ATTACK_DAMAGE, global_position)
-	spin_attack_hit.emit(area, SPIN_ATTACK_DAMAGE)
+		area.call("receive_realtime_hit", damage, global_position)
+	spin_attack_hit.emit(area, damage)
 
 func _update_animation(direction: Vector2) -> void:
 	if direction != Vector2.ZERO:
@@ -254,6 +263,7 @@ func play_action(action_name: String, target_position := global_position) -> boo
 	current_action = action_name
 	velocity = Vector2.ZERO
 	sprite.play(action_name + "_" + facing)
+	weapon_sprite.visible = false
 	action_timer.start(1.10 if action_name == "rummage" else 0.48)
 	return true
 
@@ -273,6 +283,7 @@ func _finish_action() -> void:
 	var finished_action := current_action
 	if finished_action == "spin_attack":
 		attack_hitbox.monitoring = false
+	weapon_sprite.visible = false
 	action_locked = false
 	current_action = ""
 	if has_queued_move_target:
@@ -333,12 +344,54 @@ func _create_sprite() -> void:
 	sprite.sprite_frames = _make_sprite_frames()
 	sprite.scale = Vector2.ONE * LOCOMOTION_SCALE
 	sprite.position = Vector2.ZERO
+	body_attack_material = ShaderMaterial.new()
+	body_attack_material.shader = BODY_BACKGROUND_SHADER
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	sprite.frame_changed.connect(_apply_frame_alignment)
 	sprite.animation_changed.connect(_apply_frame_alignment)
 	add_child(sprite)
 	sprite.play("idle_down")
 	_apply_frame_alignment()
+
+func _create_weapon_sprite() -> void:
+	weapon_sprite = AnimatedSprite2D.new()
+	weapon_sprite.name = "BronTorbaSprite"
+	weapon_sprite.sprite_frames = _make_weapon_sprite_frames(equipped_bag_weapon)
+	weapon_sprite.scale = Vector2.ONE * BAG_ATTACK_SCALE
+	weapon_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	weapon_sprite.z_index = 1
+	weapon_sprite.visible = false
+	add_child(weapon_sprite)
+	weapon_sprite.play(&"attack")
+	weapon_sprite.pause()
+	_apply_weapon_material()
+
+func equip_bag_weapon(weapon_id: StringName) -> bool:
+	if not BagWeaponCatalogScript.has_weapon(weapon_id):
+		return false
+	equipped_bag_weapon = weapon_id
+	if weapon_sprite != null:
+		var previous_frame := weapon_sprite.frame
+		weapon_sprite.sprite_frames = _make_weapon_sprite_frames(equipped_bag_weapon)
+		weapon_sprite.play(&"attack")
+		weapon_sprite.frame = mini(previous_frame, 7)
+		weapon_sprite.pause()
+		_apply_weapon_material()
+		_apply_weapon_alignment()
+	return true
+
+func equipped_bag_weapon_name() -> String:
+	return BagWeaponCatalogScript.display_name(equipped_bag_weapon)
+
+func _play_bag_attack() -> void:
+	sprite.play(&"bag_hammer_attack")
+	weapon_sprite.visible = true
+	weapon_sprite.play(&"attack")
+	# Warstwa broni nie ma własnego zegara. Klatkę narzuca ciało w
+	# _apply_frame_alignment(), więc obie animacje nie mogą się rozjechać.
+	weapon_sprite.pause()
+	weapon_sprite.frame = 0
+	_apply_weapon_alignment()
 
 func _make_sprite_frames() -> SpriteFrames:
 	var frames := SpriteFrames.new()
@@ -364,12 +417,26 @@ func _make_sprite_frames() -> SpriteFrames:
 			var action_row := row if action_name == "rummage" else row + 4
 			for column in range(4):
 				frames.add_frame(animation_name, _atlas_frame(ACTION_SHEET, ACTION_FRAME_SIZE, column, action_row))
-	frames.add_animation("bag_hammer_attack")
-	frames.set_animation_speed("bag_hammer_attack", 12.5)
-	frames.set_animation_loop("bag_hammer_attack", false)
+	frames.add_animation(&"bag_hammer_attack")
+	frames.set_animation_speed(&"bag_hammer_attack", 12.5)
+	frames.set_animation_loop(&"bag_hammer_attack", false)
 	for row in range(2):
 		for column in range(4):
-			frames.add_frame("bag_hammer_attack", _atlas_frame(BAG_HAMMER_ATTACK_SHEET, BAG_HAMMER_FRAME_SIZE, column, row))
+			frames.add_frame(&"bag_hammer_attack", _atlas_frame(BAG_ATTACK_BODY_SHEET, BAG_ATTACK_BODY_FRAME_SIZE, column, row))
+	return frames
+
+func _make_weapon_sprite_frames(weapon_id: StringName) -> SpriteFrames:
+	var data := BagWeaponCatalogScript.definition(weapon_id)
+	var texture := data.texture as Texture2D
+	var frame_size := BagWeaponCatalogScript.frame_size(weapon_id)
+	var frames := SpriteFrames.new()
+	frames.remove_animation(&"default")
+	frames.add_animation(&"attack")
+	frames.set_animation_speed(&"attack", 12.5)
+	frames.set_animation_loop(&"attack", false)
+	for row in range(int(data.rows)):
+		for column in range(int(data.columns)):
+			frames.add_frame(&"attack", _atlas_frame(texture, frame_size, column, row))
 	return frames
 
 func _atlas_frame(sheet: Texture2D, frame_size: Vector2i, column: int, row: int) -> AtlasTexture:
@@ -388,10 +455,10 @@ func _calculate_frame_anchors() -> void:
 	_calculate_bag_hammer_anchors()
 
 func _calculate_bag_hammer_anchors() -> void:
-	# Arkusz v2 jest przepakowany względem środka stóp zamiast obwiedni torby.
-	# Każda klatka ma identyczny punkt podłoża, więc szeroki zamach nie szarpie postacią.
+	# Ciało ma własny arkusz bez broni. Torba jest osobną, synchronizowaną warstwą,
+	# więc jej wielkość i zamach nie wpływają na kotwicę bohatera.
 	for frame_index in range(8):
-		frame_anchors["bag_hammer:%d" % frame_index] = Vector2(320, 420)
+		frame_anchors["bag_hammer:%d" % frame_index] = Vector2(256, 336)
 
 func _calculate_locomotion_anchors() -> void:
 	# Kotwice są wyliczane przez narzędzie przygotowujące arkusz, a nie przy każdym
@@ -405,8 +472,9 @@ func _apply_frame_alignment() -> void:
 	var animation_name := String(sprite.animation)
 	var is_standard_action := animation_name.begins_with("rummage_") or animation_name.begins_with("pickup_")
 	var is_bag_hammer := animation_name == "bag_hammer_attack"
+	sprite.material = body_attack_material if is_bag_hammer else null
 	if is_bag_hammer:
-		sprite.scale = Vector2.ONE * BAG_HAMMER_SCALE
+		sprite.scale = Vector2.ONE * BAG_ATTACK_SCALE
 	else:
 		sprite.scale = Vector2.ONE * (ACTION_SCALE if is_standard_action else LOCOMOTION_SCALE)
 	var direction_name := animation_name.get_slice("_", 1)
@@ -423,9 +491,36 @@ func _apply_frame_alignment() -> void:
 	else:
 		var action_row := direction_row + (4 if animation_name.begins_with("pickup_") else 0)
 		anchor_key = "action:%d:%d" % [sprite.frame, action_row]
-	var frame_size := BAG_HAMMER_FRAME_SIZE if is_bag_hammer else (ACTION_FRAME_SIZE if is_standard_action else LOCOMOTION_FRAME_SIZE)
+	var frame_size := BAG_ATTACK_BODY_FRAME_SIZE if is_bag_hammer else (ACTION_FRAME_SIZE if is_standard_action else LOCOMOTION_FRAME_SIZE)
 	var anchor: Vector2 = frame_anchors.get(anchor_key, Vector2(frame_size) * 0.5)
 	sprite.offset = Vector2(frame_size) * 0.5 - anchor
+	if weapon_sprite != null:
+		weapon_sprite.visible = is_bag_hammer and action_locked
+		if weapon_sprite.visible:
+			weapon_sprite.frame = sprite.frame
+			_apply_weapon_alignment()
+
+func _apply_weapon_alignment() -> void:
+	if weapon_sprite == null:
+		return
+	var frame_size := BagWeaponCatalogScript.frame_size(equipped_bag_weapon)
+	# Warstwy generatora zachowują tę samą znormalizowaną linię podłoża.
+	# Osobna kotwica nie zależy od obwiedni worka ani smugi zamachu.
+	var ground_y := roundf(336.0 * float(frame_size.y) / float(BAG_ATTACK_BODY_FRAME_SIZE.y))
+	var anchor := Vector2(float(frame_size.x) * 0.5, ground_y)
+	weapon_sprite.offset = Vector2(frame_size) * 0.5 - anchor
+	weapon_sprite.scale = Vector2.ONE * BAG_ATTACK_SCALE
+
+func _apply_weapon_material() -> void:
+	if weapon_sprite == null:
+		return
+	var background_key: StringName = BagWeaponCatalogScript.definition(equipped_bag_weapon).background_key
+	if background_key == &"light_checkerboard":
+		var material := ShaderMaterial.new()
+		material.shader = LIGHT_BACKGROUND_SHADER
+		weapon_sprite.material = material
+	else:
+		weapon_sprite.material = null
 
 func _create_collision() -> void:
 	var collision := CollisionShape2D.new()

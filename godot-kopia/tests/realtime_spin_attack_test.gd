@@ -24,23 +24,25 @@ func _run() -> void:
 	_expect(player.start_spin_attack(), "Prawy atak można rozpocząć")
 	_expect(not player.is_moving_to_target(), "Atak zatrzymuje marsz point and click")
 	_expect(player.is_action_busy(), "Animacja ataku blokuje kolejną akcję")
-	_expect(player.sprite.animation == "bag_hammer_attack", "Atak korzysta z osobnego arkusza zamachu reklamówką")
-	_expect(player.sprite.sprite_frames.get_frame_count("bag_hammer_attack") == 8, "Zamach reklamówką ma osiem klatek")
-	_expect(player.BAG_HAMMER_ATTACK_SHEET.get_size() == Vector2(2560, 960), "Przepakowany arkusz ataku ma regularną siatkę 4 na 2")
-	_expect(player.BAG_HAMMER_FRAME_SIZE == Vector2i(640, 480), "Szerokie klatki mieszczą pełny łuk reklamówki")
-	_expect(is_equal_approx(player.BAG_HAMMER_SCALE, 0.33), "Atak zachowuje skalę normalnej postaci")
-	var attack_image := player.BAG_HAMMER_ATTACK_SHEET.get_image()
-	_expect(attack_image.get_pixel(0, 0).a == 0.0, "Arkusz ataku ma prawdziwe przezroczyste tło")
+	_expect(player.sprite.animation == "bag_hammer_attack", "Atak korzysta z osobnego arkusza ruchu ciała")
+	_expect(player.weapon_sprite.visible and player.weapon_sprite.animation == "attack", "Broń jest osobną, aktywną warstwą animacji")
+	_expect(player.sprite.sprite_frames.get_frame_count("bag_hammer_attack") == 8, "Ruch ciała ma osiem klatek")
+	_expect(player.weapon_sprite.sprite_frames.get_frame_count("attack") == 8, "Warstwa broni ma osiem zsynchronizowanych klatek")
+	_expect(player.BAG_ATTACK_BODY_SHEET.get_size() == Vector2(2048, 768), "Arkusz ciała ma regularną siatkę 4 na 2")
+	_expect(player.BAG_ATTACK_BODY_FRAME_SIZE == Vector2i(512, 384), "Klatki ciała zachowują bezpieczne pole zamachu")
+	_expect(is_equal_approx(player.BAG_ATTACK_SCALE, 0.43), "Ciało i broń korzystają ze wspólnej skali mapowej")
+	_expect(player.equipped_bag_weapon == &"plastic_bag", "Reklamówka jest domyślną bronią torbową")
+	var plastic_definition: Dictionary = BagWeaponCatalog.definition(&"plastic_bag")
+	var plastic_image: Image = (plastic_definition.texture as Texture2D).get_image()
+	_expect(plastic_image.detect_alpha() != Image.ALPHA_NONE, "Warstwa reklamówki ma prawdziwy kanał alfa")
 	for frame_index in range(8):
 		player.sprite.frame = frame_index
 		player._apply_frame_alignment()
 		var anchor: Vector2 = player.frame_anchors["bag_hammer:%d" % frame_index]
-		var aligned_anchor := player.sprite.offset + anchor - Vector2(player.BAG_HAMMER_FRAME_SIZE) * 0.5
+		var aligned_anchor := player.sprite.offset + anchor - Vector2(player.BAG_ATTACK_BODY_FRAME_SIZE) * 0.5
 		_expect(aligned_anchor.length() < 0.01, "Klatka %d zamachu pozostaje zakotwiczona do stóp" % frame_index)
-		_expect(anchor == Vector2(320, 420), "Klatka %d używa wspólnej podstawy stóp" % frame_index)
-		var cell := attack_image.get_region(Rect2i((frame_index % 4) * 640, floori(frame_index / 4.0) * 480, 640, 480))
-		var used := cell.get_used_rect()
-		_expect(used.position.x > 8 and used.end.x < 632, "Klatka %d ma zapas po bokach i nie ucina torby" % frame_index)
+		_expect(anchor == Vector2(256, 336), "Klatka %d używa wspólnej podstawy stóp" % frame_index)
+		_expect(player.weapon_sprite.frame == frame_index, "Klatka %d broni jest zsynchronizowana z ciałem" % frame_index)
 	var queued_destination := player.global_position + Vector2(240, 60)
 	player.set_move_target(queued_destination)
 	_expect(player.has_buffered_move_command(), "Klik mapy podczas zamachu trafia do kolejki")
@@ -54,6 +56,14 @@ func _run() -> void:
 	_expect(not player.attack_hitbox.monitoring, "Po ataku hitbox reklamówki jest wyłączony")
 	_expect(player.is_moving_to_target() and not player.has_buffered_move_command(), "Po zamachu kolejka natychmiast uruchamia ruch")
 	_expect(String(player.sprite.animation).begins_with("walk_"), "Po zamachu animacja płynnie przechodzi do chodu")
+	_expect(not player.weapon_sprite.visible, "Warstwa broni znika poza animacją ataku")
+	player.cancel_move_target()
+	_expect(player.equip_bag_weapon(&"black_sack"), "Czarny worek można wyposażyć bez zmiany animacji ciała")
+	_expect(player.start_spin_attack(), "Atak czarnym workiem korzysta z tego samego ruchu bohatera")
+	_expect(player.equipped_bag_weapon_name() == "Czarny worek", "Wyposażona broń ma poprawną nazwę")
+	_expect(player.weapon_sprite.material is ShaderMaterial, "Materiał worka usuwa tło wadliwego źródła w czasie renderowania")
+	_expect(player.sprite.sprite_frames.get_frame_count("bag_hammer_attack") == 8, "Zmiana torby nie duplikuje ani nie zmienia klatek ciała")
+	await create_timer(0.70).timeout
 
 	if failures == 0:
 		print("REALTIME_SPIN_ATTACK_TEST_OK")

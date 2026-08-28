@@ -1,14 +1,14 @@
 # Mockup nowego początku — `PROLOG-00`
 
-Status: **grywalny mockup w osobnej scenie**, nie zastępuje jeszcze obecnego `FAB-01`.
+Status: **właściwy początek nowej gry**, połączony z pełną mapą osiedla.
 
 ## Uruchamianie i przełączanie
 
-- `F5` uruchamia obecną główną grę z `scenes/main.tscn`.
+- `F5` uruchamia menu główne; opcja **NOWA GRA** otwiera melinę.
 - Otwórz `scenes/melina_prologue_mockup.tscn` i naciśnij `F6`, aby uruchomić nowy prolog.
 - Drzwi przełączają scenę na `scenes/start_suburb_mockup.tscn`.
-- `F2` uruchamia melinę od początku, a `F1` wraca do obecnej gry.
-- Mockup nie zmienia `run/main_scene` w `project.godot`.
+- `F2` uruchamia melinę od początku, a `F1` pozostaje skrótem deweloperskim do obecnej gry.
+- Północne wyjście z przedmieścia prowadzi do pełnej `scenes/main.tscn`; mapa nie jest przesunięta ani przycięta.
 
 ## Hierarchia sceny
 
@@ -25,10 +25,11 @@ StartSuburbMockup (osobna scena)
 ├── samotny pies przy szopie
 ├── wataha 2 psów dalej od wyjścia
 ├── stado 4 szczurów przy odpływie
+├── północne wyjście na osiedle
 └── UI
 
 PrologueMockupState (statyczne dane przejściowe)
-└── reklamówka, puszki i zdrowie zachowane podczas zmiany sceny
+└── reklamówka, puszki i zdrowie zachowane podczas zmian scen
 ```
 
 ## Przebieg
@@ -50,6 +51,8 @@ PrologueMockupState (statyczne dane przejściowe)
 
 7. Dopiero teraz można użyć drzwi. Godot zwalnia scenę meliny i wczytuje osobną scenę przedmieścia, gdzie bohater pojawia się przed rozwaloną szopą.
 8. Przy wyjściu kręci się samotny pies. Dalej stoi wataha dwóch psów, a przy odpływie żerują cztery szczury.
+9. Przejście przez północną bramę wczytuje pełną mapę osiedla i ustawia bohatera przy jej południowej krawędzi.
+10. Jedyny kiosk i jedyny sklep Żuk Gnojarz znajdują się na pełnej mapie osiedla; przedmieście ich nie powiela.
 
 ## Assety wykorzystane w mockupie
 
@@ -58,7 +61,6 @@ PrologueMockupState (statyczne dane przejściowe)
 - puszka `crushed_can.png`,
 - dziki pies `wild_emaciated_dog_sheet_v2_packed.png`,
 - szczur `sewer_rat_sheet_v1.png`,
-- kiosk i Żuk Gnojarz jako dalsze punkty orientacyjne,
 - płot, kosze, skrzynki złomu,
 - asfalt, chodnik i trawa z obecnego zestawu terenu.
 
