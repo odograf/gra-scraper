@@ -27,6 +27,32 @@ var owned_containers := {"plastic_bag": true}
 var equipped_container := "plastic_bag"
 var tools: Dictionary = {}
 
+func save_snapshot() -> Dictionary:
+	return {
+		"items": items.duplicate(true),
+		"owned_containers": owned_containers.duplicate(true),
+		"equipped_container": equipped_container,
+		"tools": tools.duplicate(true)
+	}
+
+func restore_snapshot(data: Dictionary) -> void:
+	var saved_items: Dictionary = data.get("items", {})
+	for item_id in items:
+		items[item_id] = maxi(0, int(saved_items.get(item_id, 0)))
+	owned_containers = {"plastic_bag": true}
+	var saved_containers: Dictionary = data.get("owned_containers", {})
+	for container_id in saved_containers:
+		if CONTAINERS.has(container_id) and bool(saved_containers[container_id]):
+			owned_containers[container_id] = true
+	var requested_container := String(data.get("equipped_container", "plastic_bag"))
+	equipped_container = requested_container if owned_containers.has(requested_container) else "plastic_bag"
+	tools.clear()
+	var saved_tools: Dictionary = data.get("tools", {})
+	for tool_id in saved_tools:
+		if TOOL_MAX_DURABILITY.has(tool_id):
+			tools[tool_id] = clampi(int(saved_tools[tool_id]), 0, int(TOOL_MAX_DURABILITY[tool_id]))
+	changed.emit()
+
 func item_count(item_id: String) -> int:
 	return int(items.get(item_id, 0))
 

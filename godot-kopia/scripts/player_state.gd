@@ -23,6 +23,19 @@ func combat_snapshot() -> Dictionary:
 	snapshot["current_health"] = current_health
 	return snapshot
 
+func save_snapshot() -> Dictionary:
+	return {
+		"stats": stats.duplicate(true),
+		"current_health": current_health
+	}
+
+func restore_snapshot(data: Dictionary) -> void:
+	var restored_stats: Dictionary = data.get("stats", CombatantConfigScript.player())
+	configure(restored_stats)
+	set_health(clampi(int(data.get("current_health", maximum_health)), 0, maximum_health))
+	stats_changed.emit(stats.duplicate(true))
+	health_changed.emit(current_health, maximum_health)
+
 func apply_damage(raw_damage: int) -> int:
 	if current_health <= 0 or raw_damage <= 0:
 		return 0

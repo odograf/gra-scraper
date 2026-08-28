@@ -21,6 +21,8 @@ const PlayerStateScript := preload("res://scripts/player_state.gd")
 const RealtimeEnemyDirectorScript := preload("res://scripts/realtime_enemy_director.gd")
 const ItemCatalogScript := preload("res://scripts/item_catalog.gd")
 const LootPickupScript := preload("res://scripts/loot_pickup.gd")
+const PauseMenuScript := preload("res://scripts/pause_menu.gd")
+const SaveManagerScript := preload("res://scripts/save_manager.gd")
 const LOADING_ART := preload("res://assets/loading/map_concept.png")
 const MIREK_PORTRAIT := preload("res://assets/npcs/mirek.png")
 const ZUL_1_MAP_TEXTURE := preload("res://assets/npcs/zul_1_idle_sheet_v2.png")
@@ -81,6 +83,7 @@ var inventory_open := false
 var mirek_open := false
 var heniek_open := false
 var combat_open := false
+var pause_menu_open := false
 var alcohol_warning_shown := false
 var nicotine_warning_shown := false
 var active_fence: ScrapFence
@@ -164,6 +167,7 @@ var heniek_dialogue_label: Label
 var heniek_choices: GridContainer
 var heniek_text_tween: Tween
 var combat_overlay: Control
+var pause_menu: PauseMenu
 
 func _ready() -> void:
 	# Postacie na tej samej warstwie zasłaniają się według położenia stóp na osi Y.
@@ -183,9 +187,14 @@ func _ready() -> void:
 	_create_world_interactions()
 	_create_pickups()
 	_create_ui()
-	_show_loading_screen()
+	var loaded_data: Dictionary = _save_manager().consume_pending_load()
+	if not loaded_data.is_empty():
+		_restore_save_data(loaded_data)
+	_show_loading_screen(loaded_data.is_empty())
 
 func _process(delta: float) -> void:
+	if pause_menu_open:
+		return
 	var enemies_active := gameplay_active and player_health > 0 and not _modal_open() and active_fence == null
 	realtime_enemy_director.set_combat_active(enemies_active)
 	if not gameplay_active:
@@ -239,6 +248,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif mirek_open: _close_mirek()
 		elif kiosk_open: _close_kiosk()
 		elif store_open: _close_store()
+		elif gameplay_active: _open_pause_menu()
 	elif mirek_open and event.keycode in [KEY_ENTER, KEY_SPACE]:
 		_finish_mirek_line()
 	elif heniek_open and event.keycode in [KEY_ENTER, KEY_SPACE]:
@@ -363,6 +373,219 @@ func _focus_first_enabled_button(root_node: Node) -> void:
 
 func _modal_open() -> bool:
 	return store_open or kiosk_open or inventory_open or mirek_open or heniek_open or combat_open
+
+func _save_manager() -> GameSaveManager:
+	var manager := get_node_or_null("/root/SaveManager") as GameSaveManager
+	if manager == null:
+		manager = SaveManagerScript.new() as GameSaveManager
+		manager.name = "SaveManager"
+		get_tree().root.add_child(manager)
+	return manager
+
+func _open_pause_menu() -> void:
+	if pause_menu_open or not gameplay_active or pause_menu == null:
+		return
+	pause_menu_open = true
+	_set_focused_interactable(null)
+	player.cancel_move_target()
+	get_tree().paused = true
+	pause_menu.open_menu()
+
+func _close_pause_menu() -> void:
+	if not pause_menu_open:
+		return
+	pause_menu_open = false
+	pause_menu.close_menu()
+	get_tree().paused = false
+
+func _save_to_slot(slot: int) -> void:
+	var succeeded := _save_manager().save_game(slot, _build_save_data())
+	pause_menu.show_save_result(slot, succeeded)
+
+func _return_to_main_menu() -> void:
+	pause_menu_open = false
+	get_tree().paused = false
+	_save_manager().pending_load_data.clear()
+	get_tree().change_scene_to_file(GameSaveManager.MENU_SCENE)
+
+func _build_save_data() -> Dictionary:
+	return {
+		"player": {
+			"position": player.global_position,
+			"state": player_state.save_snapshot()
+		},
+		"inventory": inventory.save_snapshot(),
+		"resources": {
+			"cash": cash,
+			"alcohol": alcohol_level,
+			"nicotine": nicotine_level
+		},
+		"progress": {
+			"level": player_level,
+			"xp": player_xp,
+			"stat_points": stat_points,
+			"quest_state": quest_state,
+			"heniek_quest_state": heniek_quest_state,
+			"burek_defeated": burek_defeated,
+			"zul_defeated": zul_defeated
+		},
+		"fab01": {
+			"stage": fab01_stage,
+			"bag_picked": fab01_bag_picked,
+			"bought_beer": fab01_bought_beer,
+			"bought_cigarettes": fab01_bought_cigarettes,
+			"first_can_seen": fab01_first_can_seen,
+			"first_sale_seen": fab01_first_sale_seen
+		},
+		"world": _build_world_save_data()
+	}
+
+func _build_world_save_data() -> Dictionary:
+	var remaining_cans: Array[String] = []
+	for node in get_tree().get_nodes_in_group("pickup_item"):
+		if node is PickupCan and not (node as PickupCan).already_collected:
+			remaining_cans.append(String(node.name))
+	var trash_state := {}
+	for trash in trash_bins:
+		if trash == null or not is_instance_valid(trash):
+			continue
+		trash_state[String(trash.name)] = {
+			"searched": trash.searched,
+			"remaining_cans": trash.remaining_cans,
+			"remaining_wire": trash.remaining_wire,
+			"rolled_cans": trash.rolled_cans,
+			"rolled_wire": trash.rolled_wire
+		}
+	var enemies := {}
+	for enemy in wild_dog_enemies + sewer_rat_enemies:
+		if enemy == null or not is_instance_valid(enemy) or enemy.dead:
+			continue
+		enemies[String(enemy.name)] = {
+			"position": enemy.global_position,
+			"health": enemy.health
+		}
+	var drops: Array[Dictionary] = []
+	for node in get_tree().get_nodes_in_group("loot_pickup"):
+		if not node is LootPickup or (node as LootPickup).already_collected:
+			continue
+		var loot := node as LootPickup
+		drops.append({
+			"item_id": loot.item_id,
+			"position": loot.global_position,
+			"cash_cents": loot.cash_cents
+		})
+	return {
+		"remaining_cans": remaining_cans,
+		"trash": trash_state,
+		"enemies": enemies,
+		"drops": drops,
+		"cleared_loot_groups": cleared_loot_groups.duplicate(true),
+		"named_loot_rolled": named_loot_rolled.duplicate(true)
+	}
+
+func _restore_save_data(data: Dictionary) -> void:
+	var player_data: Dictionary = data.get("player", {})
+	player_state.restore_snapshot(player_data.get("state", {}))
+	var saved_position: Variant = player_data.get("position", player.global_position)
+	if saved_position is Vector2:
+		player.global_position = saved_position
+	var inventory_data: Dictionary = data.get("inventory", {})
+	inventory.restore_snapshot(inventory_data)
+	var resources: Dictionary = data.get("resources", {})
+	cash = clampf(float(resources.get("cash", 5.0)), 0.0, 9999999.0)
+	alcohol_level = clampf(float(resources.get("alcohol", 28.0)), 0.0, 100.0)
+	nicotine_level = clampf(float(resources.get("nicotine", 24.0)), 0.0, 100.0)
+	var progress: Dictionary = data.get("progress", {})
+	player_level = clampi(int(progress.get("level", 1)), 1, 999)
+	player_xp = maxi(0, int(progress.get("xp", 0)))
+	stat_points = maxi(0, int(progress.get("stat_points", 0)))
+	quest_state = clampi(int(progress.get("quest_state", QuestState.NOT_STARTED)), QuestState.NOT_STARTED, QuestState.COMPLETED)
+	heniek_quest_state = clampi(int(progress.get("heniek_quest_state", HeniekQuestState.NOT_STARTED)), HeniekQuestState.NOT_STARTED, HeniekQuestState.COMPLETED)
+	burek_defeated = bool(progress.get("burek_defeated", false))
+	zul_defeated = bool(progress.get("zul_defeated", false))
+	var fab: Dictionary = data.get("fab01", {})
+	fab01_stage = _validated_fab01_stage(String(fab.get("stage", FAB01_PICK_UP_BAG)))
+	fab01_bag_picked = bool(fab.get("bag_picked", false))
+	fab01_bought_beer = bool(fab.get("bought_beer", false))
+	fab01_bought_cigarettes = bool(fab.get("bought_cigarettes", false))
+	fab01_first_can_seen = bool(fab.get("first_can_seen", false))
+	fab01_first_sale_seen = bool(fab.get("first_sale_seen", false))
+	_restore_world_save_data(data.get("world", {}))
+	_apply_restored_npc_state()
+	if fab01_bag_picked and starter_bag != null and is_instance_valid(starter_bag):
+		starter_bag.queue_free()
+	_update_ui()
+
+func _restore_world_save_data(world_data: Dictionary) -> void:
+	if world_data.has("remaining_cans"):
+		var remaining_cans: Array = world_data.get("remaining_cans", [])
+		for node in get_tree().get_nodes_in_group("pickup_item"):
+			if node is PickupCan and not remaining_cans.has(String(node.name)):
+				node.queue_free()
+	var trash_state: Dictionary = world_data.get("trash", {})
+	for trash in trash_bins:
+		if trash == null or not is_instance_valid(trash) or not trash_state.has(String(trash.name)):
+			continue
+		var state: Dictionary = trash_state[String(trash.name)]
+		trash.searched = bool(state.get("searched", false))
+		trash.remaining_cans = maxi(0, int(state.get("remaining_cans", 0)))
+		trash.remaining_wire = maxi(0, int(state.get("remaining_wire", 0)))
+		trash.rolled_cans = maxi(0, int(state.get("rolled_cans", trash.remaining_cans)))
+		trash.rolled_wire = maxi(0, int(state.get("rolled_wire", trash.remaining_wire)))
+		trash.queue_redraw()
+	if world_data.has("enemies"):
+		var enemies: Dictionary = world_data.get("enemies", {})
+		for enemy in wild_dog_enemies + sewer_rat_enemies:
+			if enemy == null or not is_instance_valid(enemy):
+				continue
+			if not enemies.has(String(enemy.name)):
+				enemy.queue_free()
+				continue
+			var enemy_data: Dictionary = enemies[String(enemy.name)]
+			var enemy_position: Variant = enemy_data.get("position", enemy.global_position)
+			if enemy_position is Vector2:
+				enemy.global_position = enemy_position
+			enemy.health = clampi(int(enemy_data.get("health", enemy.max_health)), 1, enemy.max_health)
+			enemy.queue_redraw()
+	cleared_loot_groups = _safe_bool_dictionary(world_data.get("cleared_loot_groups", {}))
+	named_loot_rolled = _safe_bool_dictionary(world_data.get("named_loot_rolled", {}))
+	for drop_data in world_data.get("drops", []):
+		if not drop_data is Dictionary:
+			continue
+		var item_id := String(drop_data.get("item_id", ""))
+		var drop_position: Variant = drop_data.get("position", player.global_position)
+		if drop_position is Vector2:
+			_spawn_loot(item_id, drop_position, maxi(0, int(drop_data.get("cash_cents", 0))))
+
+func _apply_restored_npc_state() -> void:
+	if burek_npc != null and is_instance_valid(burek_npc) and burek_defeated:
+		burek_npc.position = _map_marker_position("StanyNPC/BurekPoWalce", BUREK_DEFEATED_POSITION)
+		burek_npc.set_fight_enabled(false)
+	if zul_npc == null or not is_instance_valid(zul_npc):
+		return
+	if zul_defeated:
+		zul_npc.position = _map_marker_position("StanyNPC/ZulPoWalce", ZUL_DEFEATED_POSITION)
+		zul_npc.set_fight_enabled(false)
+	elif quest_state == QuestState.COMPLETED:
+		zul_npc.position = _map_marker_position("StanyNPC/ZulBlokuje", ZUL_BLOCK_POSITION)
+		zul_npc.set_fight_enabled(true)
+	else:
+		zul_npc.position = _map_marker_position("StanyNPC/ZulCzeka", ZUL_WAIT_POSITION)
+		zul_npc.set_fight_enabled(false)
+
+func _validated_fab01_stage(value: String) -> String:
+	if value in [FAB01_PICK_UP_BAG, FAB01_BUY_NEEDS, FAB01_FIND_MIREK, FAB01_COMPLETED]:
+		return value
+	return FAB01_PICK_UP_BAG
+
+func _safe_bool_dictionary(value: Variant) -> Dictionary:
+	var result := {}
+	if not value is Dictionary:
+		return result
+	for key in value:
+		if bool(value[key]):
+			result[String(key)] = true
+	return result
 
 func _create_world() -> void:
 	world_map = get_node_or_null("Osiedle") as WorldMap
@@ -663,7 +886,7 @@ func _spawn_loot_from_table(table_id: String, drop_position: Vector2) -> String:
 	_spawn_loot(item_id, drop_position)
 	return ItemCatalogScript.display_name(item_id)
 
-func _spawn_loot(item_id: String, drop_position: Vector2) -> LootPickup:
+func _spawn_loot(item_id: String, drop_position: Vector2, restored_cash_cents := -1) -> LootPickup:
 	var definition := ItemCatalogScript.definition(item_id)
 	if definition.is_empty() or not definition.has("texture"):
 		push_error("Brak definicji grafiki łupu: %s" % item_id)
@@ -677,7 +900,7 @@ func _spawn_loot(item_id: String, drop_position: Vector2) -> LootPickup:
 	loot.display_name = ItemCatalogScript.display_name(item_id)
 	loot.item_texture = definition.texture as Texture2D
 	if ItemCatalogScript.is_direct_cash(item_id):
-		loot.cash_cents = ItemCatalogScript.roll_cash_cents(item_id, loot_rng)
+		loot.cash_cents = restored_cash_cents if restored_cash_cents >= 0 else ItemCatalogScript.roll_cash_cents(item_id, loot_rng)
 	loot.can_accept_callback = func() -> bool:
 		return fab01_bag_picked and (ItemCatalogScript.is_direct_cash(item_id) or inventory.can_add(item_id))
 	loot.collected.connect(_on_loot_collected)
@@ -755,6 +978,12 @@ func _create_ui() -> void:
 	_create_heniek_ui(canvas)
 	_create_action_ui(canvas)
 	_create_combat_ui(canvas)
+	pause_menu = PauseMenuScript.new() as PauseMenu
+	pause_menu.name = "MenuPauzy"
+	pause_menu.resume_requested.connect(_close_pause_menu)
+	pause_menu.save_slot_requested.connect(_save_to_slot)
+	pause_menu.main_menu_requested.connect(_return_to_main_menu)
+	add_child(pause_menu)
 	_update_ui()
 
 func _create_hud(canvas: CanvasLayer) -> void:
@@ -2168,7 +2397,7 @@ func _begin_fab01_gameplay() -> void:
 	_show_message("Podejdź do reklamówki i naciśnij Enter.")
 	_update_ui()
 
-func _show_loading_screen() -> void:
+func _show_loading_screen(show_intro := true) -> void:
 	player.set_physics_process(false)
 	var canvas := CanvasLayer.new()
 	canvas.name = "EkranLadowania"
@@ -2198,4 +2427,10 @@ func _show_loading_screen() -> void:
 	tween.tween_property(overlay, "modulate:a", 0.0, 0.45)
 	await tween.finished
 	canvas.queue_free()
-	_show_fab01_intro()
+	if show_intro:
+		_show_fab01_intro()
+	else:
+		gameplay_active = true
+		player.set_physics_process(true)
+		_show_message("Wczytano zapis ze slotu %d." % _save_manager().current_slot)
+		_update_ui()

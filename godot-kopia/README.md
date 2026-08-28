@@ -18,7 +18,7 @@ Nowy układ startu jest osobną sceną i nie zastępuje jeszcze obecnej gry:
 1. Otwórz `scenes/melina_prologue_mockup.tscn`.
 2. Naciśnij **F6**, aby uruchomić tylko mockup.
 3. W mockupie naciśnij **F1**, aby wrócić do obecnej sceny głównej.
-4. **F5** nadal uruchamia dotychczasową grę bez zmian.
+4. **F5** uruchamia menu główne; właściwa rozgrywka zaczyna się po wybraniu `Nowa gra` albo slotu zapisu.
 
 Melina i przedmieście są osobnymi scenami. Drzwi po zebraniu sześciu puszek przełączają grę z `melina_prologue_mockup.tscn` do `start_suburb_mockup.tscn`, zachowując reklamówkę, puszki i zdrowie. **F2** uruchamia melinę od początku. Lista brakujących docelowych grafik znajduje się w `docs/PROLOG_MAP_MOCKUP.md`.
 
@@ -46,10 +46,20 @@ Mapa jest zapisana jako osobna scena [world_map.tscn](scenes/world_map.tscn) i j
 - **I** — ekwipunek, pojemniki, trwałość narzędzi i rozwój statystyk,
 - **ikona torby w dolnym HUD-zie** — otwiera ten sam ekran ekwipunku co klawisz I,
 - **lewy przycisk na NPC, drzwiach, automacie lub płocie** — interakcja,
-- **ESC** — zamknięcie menu lub anulowanie wycinania siatki.
+- **ESC** — zamknięcie aktywnego okna lub anulowanie wycinania siatki; na mapie otwiera menu pauzy z zapisem gry.
+
+## Zapisywanie gry
+
+- Menu główne pozwala rozpocząć nową grę albo wczytać jeden z trzech slotów.
+- Podczas gry naciśnij **Esc**, wybierz **Zapisz grę**, a następnie wskaż slot.
+- Zajęty slot jest zastępowany po wybraniu. Przy każdym zastąpieniu gra zachowuje kopię zapasową poprzedniego pliku.
+- Zapisy znajdują się w katalogu Godota `user://`, a nie wewnątrz projektu.
 
 ## Obecna zawartość
 
+- osobne menu główne z rozpoczęciem nowej gry, podglądem trzech slotów i wczytywaniem postępu,
+- menu pauzy pod Esc z wyborem slotu zapisu, wznowieniem oraz powrotem do menu głównego,
+- wersjonowany zapis stanu bohatera, ekwipunku, zadań, świata, przeciwników i leżących dropów,
 - dolny HUD: duży centralny pasek życia, mniejsze paski alkoholu i nikotyny po bokach oraz przycisk torby; informacje o pieniądzach, pojemniku i poziomie pozostają w kompaktowym panelu u góry,
 - ruch point & click z marszem po skosie, znacznikiem celu i zatrzymaniem przy kolizji; klik mapy podczas zamachu kolejkuje płynny ruch wykonywany zaraz po animacji,
 - pierwszy atak czasu rzeczywistego: osobna 8-klatkowa animacja zamachu reklamówką i aktywny hitbox trafiający każdy cel najwyżej raz,

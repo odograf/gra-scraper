@@ -216,6 +216,15 @@ Narzędzie nie jest tylko przedmiotem zwiększającym statystykę. Powinno otwie
 
 - Limit miejsca i udźwigu jest chwilowo wyłączony dla wszystkich posiadanych pojemników.
 - Nominalne pojemności, wagi przedmiotów i parametry toreb pozostają zapisane; przełącznik można później ponownie włączyć bez migracji danych.
+
+### MEC-035: Menu główne i ręczne zapisy — wdrożone
+
+- Gra uruchamia się w menu głównym z opcjami `Nowa gra`, `Wczytaj grę` i `Wyjście`.
+- Dostępne są trzy niezależne sloty. Menu wczytywania pokazuje poziom postaci oraz datę ostatniego zapisu i blokuje puste sloty.
+- Podczas rozgrywki `Esc` najpierw zamyka aktywne okno, a gdy żadne okno nie jest otwarte, zatrzymuje świat i otwiera menu pauzy.
+- `Zapisz grę` w menu pauzy pozwala wybrać jeden z trzech slotów; wybranie zajętego slotu zastępuje jego poprzedni stan.
+- Zapis obejmuje stan bohatera, pozycję, zdrowie, statystyki, potrzeby, gotówkę, ekwipunek, narzędzia, zadania, stan puszek i kontenerów, żyjących przeciwników oraz fizyczne dropy.
+- Pliki są wersjonowane, walidowane przy odczycie i przechowywane w `user://`; przed zastąpieniem istniejącego pliku tworzona jest kopia zapasowa.
 - HUD i ekran ekwipunku pokazują w tym trybie `BEZ LIMITU`, zamiast sugerować przepełnienie.
 - Jest to świadome tymczasowe odstępstwo od `MEC-003` i podstawowej decyzji transportowej, przeznaczone do testowania dropów i dalszej zawartości.
 
@@ -416,7 +425,7 @@ Im wyższy potencjalny zarobek, tym większe powinny być wymagania, czas oraz r
 - [ ] Relacje z NPC.
 - [x] Drugi NPC — Heniek Mechanik — oraz wieloetapowe zlecenie z wymianą przedmiotów i nagrodą XP.
 - [ ] Generowanie wariantów map.
-- [ ] Zapis i wczytywanie gry.
+- [x] Menu główne oraz zapis i wczytywanie gry w trzech slotach.
 
 ## 12. Najbliższa grywalna wersja
 
